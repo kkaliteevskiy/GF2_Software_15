@@ -54,3 +54,49 @@ class Scanner:
 
     def get_symbol(self):
         """Translate the next sequence of characters into a symbol."""
+
+    def get_name(self, input_file):
+        """Return the next name string in input file and place the next non alphanumeric character in current_character."""
+        """Return none if no name is found and an empty string in current_character if end of file is reached."""
+    
+        name = ""
+
+        while True:
+            char = input_file.read(1)
+            if not char:
+                if name:
+                    return name
+                else:
+                    return None  # End of file reached
+            if char.isalnum():  # Continuation of a name
+                name += char
+            else:
+                if name:
+                    self.current_character = char
+                    break
+                continue
+
+        return name
+    
+    def get_number(self, input_file):
+        """Seek the next number in input_file.
+        Return the number (or None) and the next non-numeric character.
+        """
+        number = ""
+
+        while True:
+            char = input_file.read(1)
+            if not char:
+                if number:
+                    return int(number)
+                else:
+                    return None  # End of file reached
+            if char.isdigit():
+                number += char
+            else:
+                if number:
+                    self.current_character = char
+                    break
+                continue
+
+        return int(number)
