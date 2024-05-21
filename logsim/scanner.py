@@ -27,6 +27,8 @@ class Symbol:
         """Initialise symbol properties."""
         self.type = None
         self.id = None
+        self.line = None
+        self.position = None
 
 
 class Scanner:
@@ -51,9 +53,65 @@ class Scanner:
 
     def __init__(self, path, names):
         """Open specified file and initialise reserved words and IDs."""
+        self.file = self.open_file(path)
+        self.names = names
+        self.symbol_type_list = [self.COMMA, self.SEMICOLON, self.EQUALS, self.DOT, self.KEYWORD, self.NUMBER, self.NAME, self.EOF] = range(8)
+        self.keywords_list = ['DEF', 'CON', 'MONITOR'] # add a END keyword?
+        # to be defined or add into keywords list
+        # self.devicetypes = 
+        # self.inputs = 
+        # self.outputs = 
+        [self.DEF_ID, self.CONNECT_ID, self.MONITOR_ID] = self.names.lookup(self.keywords_list)
+        self.current_character = ''
+
 
     def get_symbol(self):
         """Translate the next sequence of characters into a symbol."""
+        symbol = Symbol()
+        self.skip_spaces()
+
+        if self.current_character.isalpha(): # NAME or KEYWORD
+            name_string = self.get_name()
+            if name_string in self.keywords_list:
+                symbol.type = self.KEYWORD
+            else:
+                symbol.type = self.NAME
+            [symbol.id] = self.names.lookup([name_string])
+
+        elif self.current_character.isdigit(): # number
+            symbol.id = self.get_number()
+            symbol.type = self.NUMBER
+        
+        elif self.current_character == '=':
+            symbol.type = self.EQUALS
+            self.advance()
+
+        elif self.current_character == ',':
+            symbol.type = self.COMMA
+            self.advance()
+
+        elif self.current_character == ';':
+            symbol.type = self.SEMICOLON
+            self.advance()
+        
+        elif self.current_character == '.':
+            symbol.type = self.DOT
+            self.advance()
+        
+        elif self.current_character == '': # end of file
+            symbol.type = self.EOF
+
+        else:
+            self.advance()
+
+    def open_file(path):
+        pass
+
+    def skip_spaces():
+        pass
+
+    def advance():
+        pass
 
     def get_name(self, input_file):
         """Return the next name string in input file and place the next non alphanumeric character in current_character."""
