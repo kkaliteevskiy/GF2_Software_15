@@ -105,17 +105,34 @@ class Scanner:
             self.advance()
 
     def open_file(path):
-        pass
+        """Open the specified file and return a file object."""
+        try:
+            file = open(path, 'r')
+            return file
+        except FileNotFoundError:
+            print(f"Error: File '{path}' not found.")
+            return None
+        
+    def print_error(self, line, position):
+        """Print the current input line with a marker to show the error position."""
+        print(line)
+        print(' ' * (position - 1) + '^')
+        print(f"Error: Invalid character '{self.current_character}' at line {line} position {position}.")  
 
-    def skip_spaces():
-        pass
+    def skip_spaces(self):
+        """Skip over spaces and line breaks until current_character is not whitespace."""
+        while self.current_character.isspace():
+            self.advance()
 
-    def advance():
-        pass
+    def advance(self):
+        """Read the next character from the definition file and place it in current_character."""
+        self.current_character = self.file.read(1)
 
     def get_name(self, input_file):
-        """Return the next name string in input file and place the next non alphanumeric character in current_character."""
-        """Return none if no name is found and an empty string in current_character if end of file is reached."""
+        """
+        Return the next name string in input file and place the next non alphanumeric character in current_character.
+        Return none if no name is found and an empty string in current_character if end of file is reached.
+        """
     
         name = ""
 
@@ -137,7 +154,8 @@ class Scanner:
         return name
     
     def get_number(self, input_file):
-        """Seek the next number in input_file.
+        """
+        Seek the next number in input_file.
         Return the number (or None) and the next non-numeric character.
         """
         number = ""
