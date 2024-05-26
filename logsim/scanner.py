@@ -57,16 +57,16 @@ class Scanner:
         self.names = names
         self.symbol_type_list = [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, 
                                  self.KEYWORD, self.DEVICE, self.INPUT, self.OUTPUT, 
-                                 self.NUMBER, self.NAME, self.EOF] = range(8)
-        self.keywords_list = ['DEF', 'CON', 'MONITOR'],           
+                                 self.NUMBER, self.NAME, self.EOF] = range(11)
+        self.keywords_list = ['DEF', 'CON', 'MONITOR']           
         self.devices_list = ['CLOCK', 'SWITCH', 'AND', 'NAND', 'OR', 'NOR', 'XOR', 'DTYPE']                     
         self.inputs_list = ['I', 'DATA', 'CLK', 'SET', 'RESET']
         self.outputs_list = ['Q', 'QBAR']
         # add the keywords into name table
         [self.DEF_ID, self.CONNECT_ID, self.MONITOR_ID] = self.names.lookup(self.keywords_list)
         [self.CLOCK_ID, self.SWITCH_ID, self.AND_ID, self.NAND_ID, self.OR_ID, self.NOR_ID, self.XOR_ID, self.DTYPE_ID] = self.names.lookup(self.devices_list)
-        [self.I_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.RESET_ID] = self.names.lookup(self.outputs_list)
-        [self.Q_ID, self.QBAR_ID] = self.names.lookup(self.inputs_list)
+        [self.I_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.RESET_ID] = self.names.lookup(self.inputs_list)
+        [self.Q_ID, self.QBAR_ID] = self.names.lookup(self.outputs_list)
 
         self.current_character = ''
         self.current_line = 0
@@ -77,7 +77,7 @@ class Scanner:
         """Translate the next sequence of characters into a symbol."""
         symbol = Symbol()
         self.skip_spaces()
-        symbol.line, symbol.position = self.find_character_position() # to modify
+        symbol.line, symbol.position = self.current_line, self.character_number
 
         if self.current_character.isalpha(): # NAME or KEYWORD or device or i/o
             name_string = self.get_name()
@@ -122,22 +122,22 @@ class Scanner:
 
         else:
             self.advance()
+        return symbol
 
-    def open_file(path):
+    def open_file(self, path):
         """Open the specified file and return a file object."""
         try:
-            file = open(path, 'r')
-            return file
+            return open(path, 'r')  # Return file object
         except FileNotFoundError:
             print(f"Error: File '{path}' not found.")
             return None
 
 
-    def print_error(self, line, position):
+    def print_error(self):
         """Print the current input line with a marker to show the error position."""
-        print(line)
-        print(' ' * (position - 1) + '^')
-        print(f"Error: Invalid character '{self.current_character}' at line {line} position {position}.")  
+        print(self.current_line)
+        print(' ' * (self.character_number - 1) + '^')
+        print(f"Error: Invalid character '{self.current_character}' at line {self.current_line} position {self.character_number}.")  
 
     def skip_spaces(self):
         """Skip over spaces and line breaks until current_character is not whitespace."""
@@ -179,7 +179,7 @@ class Scanner:
             if self.current_character.isalnum():
                 name = name + self.current_character
             else:
-                return [name, self.current_character]
+                return name
         '''
         while True:
             char = input_file.read(1)
@@ -209,7 +209,7 @@ class Scanner:
             if self.current_character.isdigit():
                 number = number + self.current_character
             else:
-                return [number, self.current_character]
+                return number
         '''
         while True:
             char = input_file.read(1)

@@ -1,0 +1,22 @@
+    # define  logic gates
+    
+    DEF G1 = AND 2 ;
+    DEF SW1 = SWITCH 0 ;
+    DEF SW2 = SWITCH 0 ;
+    DEF SW3 = SWITCH 0 ;
+    DEF SW4 = SWITCH 0 ;
+    DEF Q1 = DTYPE ;
+    DEF C1 = CLOCK 1 ;
+
+    # define connections
+    
+    CON SW1 . OUT -> G1 . I1 ;
+    CON SW2 . OUT -> G1 . I2 ;
+    CON G1 . OUT -> Q1 . DATA ;
+    CON C1 . OUT -> Q1 . CLOCK ;
+    CON SW3 . OUT -> Q1 . SET ;
+    CON SW4 . OUT -> Q1 . RESET ;
+    
+    # add monitor point
+    
+    MONITOR Q1 . QBAR ;
