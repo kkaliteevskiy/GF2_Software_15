@@ -25,17 +25,13 @@ class Names:
 
     Public methods
     -------------
-    unique_error_codes(self, num_error_codes): Returns a list of unique integer
-                                               error codes.
+    unique_error_codes(self, num_error_codes): Returns a list of unique integer error codes.
 
-    query(self, name_string): Returns the corresponding name ID for the
-                        name string. Returns None if the string is not present.
+    query(self, name_string): Returns the corresponding name ID for the name string. Returns None if the string is not present.
 
-    lookup(self, name_string_list): Returns a list of name IDs for each
-                        name string. Adds a name if not already present.
+    lookup(self, name_string_list): Returns a list of name IDs for each name string. Adds a name if not already present.
 
-    get_name_string(self, name_id): Returns the corresponding name string for
-                        the name ID. Returns None if the ID is not present.
+    get_name_string(self, name_id): Returns the corresponding name string for the name ID. Returns None if the ID is not present.
     """
 
     def __init__(self):
@@ -67,7 +63,16 @@ class Names:
         If the name string is not present in the names list, add it.
         """
         name_ids = []
+        if not isinstance(name_string_list, list):
+            raise TypeError("Must enter a list of strings to look up")
         for name_string in name_string_list:
+            if not name_string[0].isalpha():
+                raise TypeError("Name must start with a letter.")
+            else:
+                for name in name_string:
+                    # allow underscore in names for now (used in device.py)
+                    if not name.isalnum() and name != '_':
+                        raise TypeError("Name must be alphanumeric")
             if name_string in self.names:
                 name_ids.append(self.names.index(name_string))
             else:
