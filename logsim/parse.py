@@ -68,10 +68,10 @@ class Parser:
     
     def parse_def(self):
         '''Parse the DEF statement
-        EBNF: device = ‘DEF’, devicename, '=', devicetype, deviceproperty, ';' ;'''
+        EBNF: device = 'DEF', devicename, '=', devicetype, deviceproperty, ';' ;'''
 
         device_name = None
-        device_type = None
+        device_kind = None
         device_property = None
         device_id = None
         
@@ -80,7 +80,7 @@ class Parser:
         if symbol.type == self.scanner.NAME:
             device_id = symbol.id
             # device_name = self.names.get_name_string(symbol.id)
-            if self.devices(device_id) == None:
+            if self.devices.get_device(device_id) != None:
                 self.error('Error: Device already defined.')
             else:
                 pass 
@@ -94,37 +94,31 @@ class Parser:
         else:
             self.error('Error: Expected =')
 
-
         # expected devicetype
         symbol = self.scanner.get_symbol()
-        if symbol.type in self.scanner.device_types:
-            device_type = self.names.get_name_string(symbol.id)
+        if symbol.type in self.scanner.devices_list:
+            device_kind = self.names.get_name_string(symbol.id)#expect this to be a string like "AND"
         else:
             self.error('Error: Expected device type.')
 
-        # expected deviceproperty: if deice takes a parameter expect the parameter, else expect ';'
-        symbol = self.scanner.get_symbol()
-
-        
-        #match device to deviceproperty
-        if device_type == 'AND':
-            self.parse_and(symbol, device_type)
-        elif device_type == 'OR':
-            self.parse_or(symbol, device_type)
-        elif device_type == 'NOR':
-            self.parse_not(symbol, device_type)
-        elif device_type == 'NAND':
-            self.parse_nand(symbol, device_type)
-        elif device_type == 'XOR':
-            self.parse_nor(symbol, device_type)
-        elif device_type == 'DTYPE':
-            self.parse_xor(symbol, device_type)
-        elif device_type == 'CLOCK':
-            self.parse_xnor(symbol, device_type)
-        elif device_type == 'SWITCH':
-            self.parse_switch(symbol, device_type)
+        if device_kind == 'AND':
+            self.parse_and(device_id, device_kind)
+        elif device_kind == 'OR':
+            self.parse_or(device_id, device_kind)
+        elif device_kind == 'NOR':
+            self.parse_not(device_id, device_kind)
+        elif device_kind == 'NAND':
+            self.parse_nand(device_id, device_kind)
+        elif device_kind == 'XOR':
+            self.parse_nor(device_id, device_kind)
+        elif device_kind == 'DTYPE':
+            self.parse_xor(device_id, device_kind)
+        elif device_kind == 'CLOCK':
+            self.parse_xnor(device_id, device_kind)
+        elif device_kind == 'SWITCH':
+            self.parse_switch(device_id, device_kind)
         else:
-            self.error('Error: Unknown device type: ', device_type)
+            self.error('Error: Unknown device type: ', device_kind)
 
 
         return True
@@ -132,21 +126,21 @@ class Parser:
     def parse_con(self):
         '''connection = 'CON', devicename, ['.', output], '->', devicename, '.',  input, ';'; '''
         output_device = None
-        output_pin = None
+        output_device_id = None
         input_device = None
-        input_pin = None
-        
+        input_device_id = None
+        output_port_id = None
+        input_port_id = None
 
         symbol = self.scanner.get_symbol()
+        output_device = self.devices.get_device(symbol.id)
+        output_device_id = symbol.id
 
         # expected devicename 
         if symbol.type == self.scanner.NAME:
-            output_device = self.devices.get_device(symbol.id)
-            if output_device != None:
-
+            if self.devices.get_device(symbol.id) != None:#check device is in the devices list
                 #DTYPE is the only device that needs to be handled differently
-                if output_device.device_kind == 'DTYPE':
-
+                if output_device.device_kind == self.scanner.D_TYPE:
                     #get output pin
                     symbol = self.scanner.get_symbol()
                     if symbol.type == self.scanner.DOT:
@@ -155,12 +149,12 @@ class Parser:
                         self.error('Error: Expected "."')
                     
                     symbol = self.scanner.get_symbol()
-                    if symbol.type == self.scanner.OUTPUT:
-                        output_pin = symbol.id
+                    if symbol.type in  self.scanner.outputs_list:
+                        output_port_id = symbol.id
                     else:
-                        self.error('Error: Expected output pin ')
-
-                # all other devices have 1 output
+                        self.error('Error: Expected DTYPE output pin ')
+                else:# all other devices have 1 output
+                    output_port_id = None # TODO how are outputs labeled
                 
                 #check arrow
                 symbol = self.scanner.get_symbol()
@@ -173,8 +167,8 @@ class Parser:
                 symbol = self.scanner.get_symbol()
                 if symbol.type == self.scanner.NAME:
                     input_device = self.devices.get_device(symbol.id)
+                    input_device_id = symbol.id
                     if input_device != None:
-                        
                         #get input pin
                         symbol = self.scanner.get_symbol()
                         if symbol.type == self.scanner.DOT:
@@ -183,8 +177,8 @@ class Parser:
                             self.error('Error: Expected "."')
                         
                         symbol = self.scanner.get_symbol()
-                        if symbol.type == self.scanner.INPUT:
-                            input_pin = symbol.id
+                        if self.names.get_name_string(symbol.id) in input_device.inputs.keys():# TODO how do we do this???? I think this should work now
+                            input_port_id = symbol.id
                         else:
                             self.error('Error: Expected input pin ')
                     else:
@@ -192,7 +186,7 @@ class Parser:
                 else:
                     self.error('Error: invalid device name: ...')
 
-                # TODO : create connection/signal
+                self.network.make_connection(output_device_id, output_port_id, input_device_id, input_port_id)
 
                 pass
             else:
@@ -206,79 +200,17 @@ class Parser:
         else:
             self.error('Error: expected ";"')
 
-
-        # # check device type
-        # if self.devices.query(output_device):
-        #     device_type = self.devices.get_device_type(output_device)
-
-        # # expected '.'
-        # symbol = self.scanner.get_symbol()
-        # if symbol.type == self.scanner.DOT:
-        #     pass
-        # else:
-        #     self.error('Error: Expected "."')
-
-        # # dtype has more than 1 output need to parse that. THIS CODE SHOULD PARSR THE GATE
-
-        # # expected output pin 
-        # symbol = self.scanner.get_symbol()
-        # if symbol.type == self.scanner.OUTPUT: # check this
-        #     output_pin = symbol.id #perhaps
-        # else:
-        #     self.error('Error: Expected pin number')
-        
-        # # expected '->'
-        # symbol = self.scanner.get_symbol()
-        # if symbol.type == self.scanner.ARROW:
-        #     pass
-        # else:
-        #     self.error('Error: Expected "->"')
-        
-        # # expected devicename
-        # if symbol.type == self.scanner.NAME:
-        #     output_device = self.names.get_name_string(symbol.id)
-        #     if self.devices.query(output_device):
-        #         # TODO: define monitor
-        #         pass
-        #     else:
-        #         self.error('Error: Device not defined.')
-        # else:
-        #     self.error('Error: nvalid device name: ...')
-
-        # # expected '.'
-        # symbol = self.scanner.get_symbol()
-        # if symbol.type == self.scanner.DOT:
-        #     pass
-        # else:
-        #     self.error('Error: Expected "."')
-
-        # # expected input pin 
-        # symbol = self.scanner.get_symbol()
-        # if symbol.type == self.scanner.INPUT:
-        #     output_pin = symbol.id
-        # else:
-        #     self.error('Error: Expected pin number')
-
-        # symbol = self.scanner.get_symbol()
-        # if symbol == self.scanner.SEMICOLON:
-        #     pass
-        # else:
-        #     self.error('Error: expected ";"')
-        
-        # # TODO : define connection/s
-
         return True
 
     def parse_monitor(self):
-        monitor_device = None
-        monitor_pin = None
+        monitor_device_id = None
+        monitor_port_id = None
 
         symbol = self.scanner.get_symbol()
         # expected devicename 
         if symbol.type == self.scanner.NAME:
             input_device = self.names.get_name_string(symbol.id)
             if self.devices.query(input_device):
-                # TODO: define monitor
                 pass
             else:
                 self.error('Error: Device not defined.')
@@ -295,93 +227,148 @@ class Parser:
         # expected output pin
         symbol = self.scanner.get_symbol()
         if symbol.type == self.scanner.PINNUMBER:
-            output_pin = symbol.id
+            output_port_id = symbol.id
         else:
             self.error('Error: Expected pin number')
 
-        # TODO : define monitor
+        self.monitors.make_monitor(monitor_device_id, monitor_port_id)  
 
         return True
 
 
     #parse devices
-    def parse_and(self, symbol, device_type):
-        if symbol == self.scanner.DEVICEPROPERTY:
+    def parse_and(self, device_id, device_kind):
 
-            # TODO: define gate
+        symbol = self.scanner.get_symbol()
 
-            symbol = self.scanner.get_symbol()
-            if symbol == self.scanner.SEMICOLON:
-                pass
+        if symbol.type == self.scanner.NUMBER:
+            # number of gates
+            no_of_inputs = int(self.names.get_name_string(symbol.id))
+            if no_of_inputs >= 1 and no_of_inputs <= 16:
+                self.devices.make_device(device_id, device_kind, no_of_inputs)
             else:
-                self.error('Error: expected ";"')
+                self.error('Error: expected number of input pins 1-16')
+        else:
+            self.error('Error: expected number of input pins 1-16')
+    
+        symbol = self.scanner.get_symbol()
+        if symbol.type == self.scanner.SEMICOLON:
+            pass
+        else:
+            self.error('Error: expected ";"')
+        return True
+
+    def parse_or(self, device_id, device_kind):
+        
+        symbol = self.scanner.get_symbol()
+        if symbol == self.scanner.NUMBER:
+            no_of_inputs = int(self.names.get_name_string(symbol.id))
+            if no_of_inputs >= 1 and no_of_inputs <= 16:
+                self.devices.make_device(device_id, device_kind, no_of_inputs)
+            else:
+                self.error('Error: expected number of input pins 1-16')
         else:
             self.error('Error: expected number of input pins 1-16')
 
-    def parse_or(self, symbol, device_type):
-        if symbol == self.scanner.DEVICEPROPERTY:
-           
-            # TODO: define gate
-
-            symbol = self.scanner.get_symbol()
-            if symbol == self.scanner.SEMICOLON:
-                pass
-            else:
-                self.error('Error: expected ";"')
-        else:
-            self.error('Error: expected number of input pins 2-16')
-
-    def parse_nor(self, symbol, device_type):
-        if symbol == self.scanner.DEVICEPROPERTY:
-            
-            # TODO: define gate
-
-            symbol = self.scanner.get_symbol()
-            if symbol == self.scanner.SEMICOLON:
-                pass
-            else:
-                self.error('Error: expected ";"')
-
-        else:
-            self.error('Error: expected number of input pins 2-16')
-
-
-    def parse_nand(self, symbol, device_type):
-        if symbol == self.scanner.DEVICEPROPERTY:
-            
-            # TODO: define gate
-
-            symbol = self.scanner.get_symbol()
-            if symbol == self.scanner.SEMICOLON:
-                pass
-            else:
-                self.error('Error: expected ";"')
-        else:
-            self.error('Error: expected number of input pins 2-16')
-
-
-    def parse_xor(self, symbol, device_type):
+        symbol.type = self.scanner.get_symbol()
         if symbol == self.scanner.SEMICOLON:
-            
-            # TODO: define gate
+            pass
+        else:
+            self.error('Error: expected ";"')
+        return True
 
+    def parse_nor(self, device_id, device_kind):
+
+        symbol = self.scanner.get_symbol()
+        if symbol == self.scanner.NUMBER:
+            no_of_inputs = int(self.names.get_name_string(symbol.id))
+            if no_of_inputs >= 1 and no_of_inputs <= 16:
+                self.devices.make_device(device_id, device_kind, no_of_inputs)
+            else:
+                self.error('Error: expected number of input pins 1-16')
+        else:
+            self.error('Error: expected number of input pins 1-16')
+
+        symbol.type = self.scanner.get_symbol()
+        if symbol == self.scanner.SEMICOLON:
+            pass
+        else:
+            self.error('Error: expected ";"')
+        return True
+
+
+    def parse_nand(self, device_id, device_kind):
+        
+        symbol = self.scanner.get_symbol()
+        if symbol == self.scanner.NUMBER:
+            no_of_inputs = int(self.names.get_name_string(symbol.id))
+            if no_of_inputs >= 1 and no_of_inputs <= 16:
+                self.devices.make_device(device_id, device_kind, no_of_inputs)
+            else:
+                self.error('Error: expected number of input pins 1-16')
+        else:
+            self.error('Error: expected number of input pins 1-16')
+
+        symbol.type = self.scanner.get_symbol()
+        if symbol == self.scanner.SEMICOLON:
+            pass
+        else:
+            self.error('Error: expected ";"')
+        
+        return True
+
+
+    def parse_xor(self, device_id, device_kind):
+
+        self.devices.make_device(device_id, device_kind)
+
+        symbol = self.scanner.get_symbol()
+        if symbol == self.scanner.SEMICOLON:
             pass
         else:
             self.error('Error: expected ";"')
     
-    def parse_dtype(self, symbol, device_type):
-        if symbol == self.scanner.SEMICOLON:
-            
-            # TODO: define gate
+    def parse_dtype(self, device_id, device_kind):
 
+        self.devices.make_device(device_id, device_kind)
+
+        symbol = self.scanner.get_symbol()
+        if symbol == self.scanner.SEMICOLON:
             pass
         else:
             self.error('Error: expected ";"')
 
-    def parse_clock(self, symbol, device_type):
+    def parse_clock(self, device_id, device_kind):
+        symbol = self.scanner.get_symbol()
+        if symbol.type == self.scanner.NUMBER:
+            half_period = int(self.names.get_name_string(symbol.id))
+            self.devices.make_device(device_id, device_kind, half_period)
+        else:
+            self.error('Error: expected half period of type INT')
+
+        symbol = self.scanner.get_symbol()
+
         if symbol == self.scanner.SEMICOLON:
-            
-            # TODO: define gate
+            pass
+        else:
+            self.error('Error: expected ";"')
+
+    def parse_switch(self, device_id, device_kind):
+
+        symbol = self.scanner.get_symbol()
+        if symbol == self.scanner.NUMBER:
+            state = int(self.names.get_name_string(symbol.id))
+            if state == 0 or state == 1:
+                pass
+            else:
+                self.error('Error: expected state 0 or 1')
+
+            self.devices.make_device(device_id, device_kind, state)
+        else:
+            self.error('Error: expected state 0 or 1')
+        
+        symbol = self.scanner.get_symbol()
+        if symbol == self.scanner.SEMICOLON:
             pass
         else:
             self.error('Error: expected ";"')
@@ -392,16 +379,5 @@ class Parser:
         while symbol.type != self.scanner.SEMICOLON and symbol.type != self.scanner.EOF:
             symbol = self.scanner.get_symbol()
 
-    def parse_switch(self, symbol, device_type):
-        if symbol == self.scanner.DEVICEPROPERTY:
-
-            # TODO make switch
-             
-            symbol = self.scanner.get_symbol()
-            if symbol == self.scanner.SEMICOLON:
-                pass
-            else:
-                self.error('Error: expected ";"')
-        else:
-            self.error('Error: expected state 0 or 1')
+   
         
