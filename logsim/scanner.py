@@ -68,9 +68,9 @@ class Scanner:
         [self.I_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.RESET_ID] = self.names.lookup(self.inputs_list)
         [self.Q_ID, self.QBAR_ID] = self.names.lookup(self.outputs_list)
 
-        self.current_character = ''
+        self.current_character = ' '
         self.current_line = 0
-        self.character_number = 0
+        self.character_number = -1
 
 
     def get_symbol(self):
@@ -129,8 +129,7 @@ class Scanner:
         try:
             return open(path, 'r')  # Return file object
         except FileNotFoundError:
-            print(f"Error: File '{path}' not found.")
-            return None
+            raise FileNotFoundError(f"Error: File '{path}' not found.")
 
 
     def print_error(self):
@@ -140,31 +139,28 @@ class Scanner:
         print(f"Error: Invalid character '{self.current_character}' at line {self.current_line} position {self.character_number}.")  
 
     def skip_spaces(self):
-        """Skip over spaces and line breaks until current_character is not whitespace."""
-        while self.current_character.isspace():
-            self.advance()
+        """Skip over spaces and line breaks until 
+        current_character is not whitespace."""
+        while True:
+            if self.current_character.isspace():
+                self.advance()
+            # skip comment line
+            elif self.current_character == '#':
+                while self.current_character != '\n':
+                    self.advance()
+                self.advance()
+            else:
+                break
 
 
     def advance(self):
         """reads one further character into the document"""
-        '''
-        if self.read_as_string:
-            try:
-                self.current_character = self.input_file[self.character_count]
-            except IndexError:
-                self.current_character = ""
-                return self.current_character
-            self.character_count += 1
-        else:
-            self.current_character = self.input_file.read(1)
-        '''
         self.current_character = self.file.read(1)
         self.character_number += 1
 
         if self.current_character == '\n':
             self.current_line += 1
             self.character_number = 0
-
         return self.current_character
 
     def get_name(self):
@@ -176,27 +172,11 @@ class Scanner:
         name = self.current_character
         while True:
             self.current_character = self.advance()
-            if self.current_character.isalnum():
+            if self.current_character.isalnum() or self.character_number == '_':
                 name = name + self.current_character
             else:
                 return name
-        '''
-        while True:
-            char = input_file.read(1)
-            if not char:
-                if name:
-                    return name
-                else:
-                    return None  # End of file reached
-            if char.isalnum():  # Continuation of a name
-                name += char
-            else:
-                if name:
-                    self.current_character = char
-                    break
-                continue
-        return name
-        '''
+            
     
     def get_number(self):
         """
@@ -210,20 +190,3 @@ class Scanner:
                 number = number + self.current_character
             else:
                 return number
-        '''
-        while True:
-            char = input_file.read(1)
-            if not char:
-                if number:
-                    return int(number)
-                else:
-                    return None  # End of file reached
-            if char.isdigit():
-                number += char
-            else:
-                if number:
-                    self.current_character = char
-                    break
-                continue
-        return int(number)
-        '''
