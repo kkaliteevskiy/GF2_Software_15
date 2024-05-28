@@ -61,12 +61,12 @@ class Scanner:
                                  self.NUMBER, self.NAME, self.EOF] = range(11)
         self.keywords_list = ['DEF', 'CON', 'MONITOR']           
         self.devices_list = ['CLOCK', 'SWITCH', 'AND', 'NAND', 'OR', 'NOR', 'XOR', 'DTYPE']                     
-        self.inputs_list = ['I', 'DATA', 'CLK', 'SET', 'RESET']
+        self.inputs_list = ['I', 'DATA', 'CLK', 'SET', 'CLEAR']
         self.outputs_list = ['Q', 'QBAR']
         # add the keywords into name table
         [self.DEF_ID, self.CONNECT_ID, self.MONITOR_ID] = self.names.lookup(self.keywords_list)
         [self.CLOCK_ID, self.SWITCH_ID, self.AND_ID, self.NAND_ID, self.OR_ID, self.NOR_ID, self.XOR_ID, self.DTYPE_ID] = self.names.lookup(self.devices_list)
-        [self.I_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.RESET_ID] = self.names.lookup(self.inputs_list)
+        [self.I_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.CLEAR_ID] = self.names.lookup(self.inputs_list)
         [self.Q_ID, self.QBAR_ID] = self.names.lookup(self.outputs_list)
 
         self.current_character = ' '
