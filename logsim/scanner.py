@@ -54,18 +54,19 @@ class Scanner:
     def __init__(self, path, names):
         """Open specified file and initialise reserved words and IDs."""
         self.file = self.open_file(path)
+        self.path = path
         self.names = names
         self.symbol_type_list = [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, 
                                  self.KEYWORD, self.DEVICE, self.INPUT, self.OUTPUT, 
                                  self.NUMBER, self.NAME, self.EOF] = range(11)
         self.keywords_list = ['DEF', 'CON', 'MONITOR']           
         self.devices_list = ['CLOCK', 'SWITCH', 'AND', 'NAND', 'OR', 'NOR', 'XOR', 'DTYPE']                     
-        self.inputs_list = ['I', 'DATA', 'CLK', 'SET', 'RESET']
+        self.inputs_list = ['I', 'DATA', 'CLK', 'SET', 'CLEAR']
         self.outputs_list = ['Q', 'QBAR']
         # add the keywords into name table
         [self.DEF_ID, self.CONNECT_ID, self.MONITOR_ID] = self.names.lookup(self.keywords_list)
         [self.CLOCK_ID, self.SWITCH_ID, self.AND_ID, self.NAND_ID, self.OR_ID, self.NOR_ID, self.XOR_ID, self.DTYPE_ID] = self.names.lookup(self.devices_list)
-        [self.I_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.RESET_ID] = self.names.lookup(self.inputs_list)
+        [self.I_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.CLEAR_ID] = self.names.lookup(self.inputs_list)
         [self.Q_ID, self.QBAR_ID] = self.names.lookup(self.outputs_list)
 
         self.current_character = ' '
@@ -77,7 +78,6 @@ class Scanner:
         """Translate the next sequence of characters into a symbol."""
         symbol = Symbol()
         self.skip_spaces()
-        symbol.line, symbol.position = self.current_line, self.character_number
 
         if self.current_character.isalpha(): # NAME or KEYWORD or device or i/o
             name_string = self.get_name()
@@ -122,6 +122,8 @@ class Scanner:
 
         else:
             self.advance()
+        
+        symbol.line, symbol.position = self.current_line, self.character_number
         return symbol
 
     def open_file(self, path):
@@ -134,7 +136,11 @@ class Scanner:
 
     def print_error(self):
         """Print the current input line with a marker to show the error position."""
+        new_file = open(self.path, 'r')
+        lines = new_file.readlines()
+        error_line = lines[self.current_line]
         print(self.current_line)
+        print(error_line)
         print(' ' * (self.character_number - 1) + '^')
         print(f"Error: Invalid character '{self.current_character}' at line {self.current_line} position {self.character_number}.")  
 
@@ -161,6 +167,7 @@ class Scanner:
         if self.current_character == '\n':
             self.current_line += 1
             self.character_number = 0
+        #print(self.character_number)
         return self.current_character
 
     def get_name(self):
