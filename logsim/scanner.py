@@ -54,6 +54,7 @@ class Scanner:
     def __init__(self, path, names):
         """Open specified file and initialise reserved words and IDs."""
         self.file = self.open_file(path)
+        self.path = path
         self.names = names
         self.symbol_type_list = [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, 
                                  self.KEYWORD, self.DEVICE, self.INPUT, self.OUTPUT, 
@@ -77,7 +78,6 @@ class Scanner:
         """Translate the next sequence of characters into a symbol."""
         symbol = Symbol()
         self.skip_spaces()
-        symbol.line, symbol.position = self.current_line, self.character_number
 
         if self.current_character.isalpha(): # NAME or KEYWORD or device or i/o
             name_string = self.get_name()
@@ -122,6 +122,8 @@ class Scanner:
 
         else:
             self.advance()
+        
+        symbol.line, symbol.position = self.current_line, self.character_number
         return symbol
 
     def open_file(self, path):
@@ -134,7 +136,11 @@ class Scanner:
 
     def print_error(self):
         """Print the current input line with a marker to show the error position."""
+        new_file = open(self.path, 'r')
+        lines = new_file.readlines()
+        error_line = lines[self.current_line]
         print(self.current_line)
+        print(error_line)
         print(' ' * (self.character_number - 1) + '^')
         print(f"Error: Invalid character '{self.current_character}' at line {self.current_line} position {self.character_number}.")  
 
@@ -161,6 +167,7 @@ class Scanner:
         if self.current_character == '\n':
             self.current_line += 1
             self.character_number = 0
+        #print(self.character_number)
         return self.current_character
 
     def get_name(self):

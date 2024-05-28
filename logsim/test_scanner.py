@@ -4,27 +4,133 @@ from names import Names
 from scanner import Scanner, Symbol
 from unittest.mock import mock_open, patch
 
+@pytest.fixture
+def new_names():
+    return Names()
 
 @pytest.fixture
-def scanner():
-    names = Names()
-    mock_file_content = 'DEF G1 = AND 2;\nDEF Q1=DTYPE\nCON Q1.Q -> AND.I1'
-    with patch("builtins.open", mock_open(read_data=mock_file_content)) as mock_file:
-        return Scanner("path/to/definition/file", names)
+def new_symbol():
+    return Symbol()
 
-def test_get_symbol(scanner):
-    # Assuming that the first symbol in your mock file content is 'DEF'
-    symbol = scanner.get_symbol()
-    print(f"Symbol id: {symbol.id}, Symbol type: {symbol.type}")
+@pytest.fixture
+def scanner(new_names):
+    mock_file_content = 'DEF G1 = AND 2;\nDEF Q1=DTYPE\nCON Q1.Q -> AND.I1;#trial run\nCON'
+    with patch("builtins.open", mock_open(read_data=mock_file_content)) as mock_file:
+        return Scanner("path/to/definition/file", new_names)
+
+@pytest.fixture
+def scanner_edge(new_names):
+    mock_file_content = 'DEF      G1$  &ab== AND 2; This CON I '
+    with patch("builtins.open", mock_open(read_data=mock_file_content)) as mock_file:
+        return Scanner("path/to/definition/file", new_names)
+
+@pytest.fixture
+def scanner_file(new_names):
+    return Scanner("logic_definition.txt", new_names)
+
+
+def test_scanner_initial(scanner):
+    assert scanner.names.query('DEF') == 0
+    assert scanner.names.lookup(['CON', 'DEF', 'MONITOR']) == [1, 0, 2]
+    assert scanner.names.lookup(['Q', 'QBAR']) == [16, 17]
+    assert scanner.names.lookup(['G1', 'G2']) == [18, 19]
+    assert scanner.names.get_name_string(14) == 'SET'
+
+def test_scanner_raises_exception(new_names):
+    with pytest.raises(FileNotFoundError):
+        Scanner('abc.txt', new_names)
+
+def test_get_symbol_raises_exception():
+    pass
+
+def test_get_symbol_1(scanner):
+    symbol = scanner.get_symbol() # DEF
+    string = scanner.names.get_name_string(symbol.id)
+    assert string == "DEF"
+    assert symbol.type == scanner.KEYWORD
+    assert symbol.line == 0
+    assert symbol.position == 3
+
+    symbol = scanner.get_symbol() # G1
     def_string = scanner.names.get_name_string(symbol.id)
-    assert def_string == "DEF"
+    assert def_string == "G1"
+    assert symbol.type == 9
+    assert symbol.type == scanner.NAME
+    assert symbol.line == 0
+    assert symbol.position == 6
+
+    symbol = scanner.get_symbol() # =
+    assert symbol.id == None
+    assert symbol.type == scanner.EQUALS
+
+    symbol = scanner.get_symbol() # AND
+    symbol = scanner.get_symbol() # 2
+    symbol = scanner.get_symbol() # ;
+    symbol = scanner.get_symbol() # DEF
+    symbol = scanner.get_symbol() # Q1
+    symbol = scanner.get_symbol() # =
+    symbol = scanner.get_symbol() # DTYPE
+    assert symbol.id == 10
+    assert symbol.type == scanner.DEVICE
+
+
+def test_get_symbol_2(scanner_file):
+    # check it skips comment line
+    symbol = scanner_file.get_symbol() # DEF
+    string = scanner_file.names.get_name_string(symbol.id)
+    assert string == "DEF"
     assert isinstance(symbol, Symbol)
-    #assert symbol.type == scanner.KEYWORD
+    assert symbol.type == scanner_file.KEYWORD
+
+    symbol = scanner_file.get_symbol() # G1
+    string = scanner_file.names.get_name_string(symbol.id)
+    assert string == "G1"
+    assert symbol.type == 9
+    assert symbol.type == scanner_file.NAME
+
+# 'DEF      G1$  &ab== AND 2; This CON I '
+def test_get_symbol_3(scanner_edge):
+    symbol = scanner_edge.get_symbol() # DEF
+    symbol = scanner_edge.get_symbol() # G1
+    def_string = scanner_edge.names.get_name_string(symbol.id)
+    assert def_string == "G1"
+    assert symbol.type == scanner_edge.NAME
+
+    symbol = scanner_edge.get_symbol() # $
+    assert symbol.type == None
+    assert symbol.id == None
+    assert symbol.line == 0
+    assert symbol.position == 12
+
+    symbol = scanner_edge.get_symbol() # &
+    assert symbol.type == None
+    assert symbol.id == None
+    assert symbol.line == 0
+    assert symbol.position == 15
+
+
+    symbol = scanner_edge.get_symbol() # ab
+    assert symbol.line == 0
+    assert symbol.position == 17
+
+    symbol = scanner_edge.get_symbol() # =
+    assert symbol.line == 0
+    assert symbol.position == 18
+
+    symbol = scanner_edge.get_symbol() # =
+    assert symbol.line == 0
+    assert symbol.position == 19
+
+    symbol = scanner_edge.get_symbol() # AND
+    assert symbol.type == scanner_edge.DEVICE
+    assert symbol.id == 5
+    assert symbol.line == 0
+    assert symbol.position == 23
     
 
 def test_open_file(scanner):
-    file = scanner.open_file("path/to/definition/file")
-    assert scanner.current_character == ""
+    scanner.file.read(1) == 'D'
+    assert scanner.current_character == ' '
 
 def test_skip_spaces(scanner):
     # scanner.current_character initialised to ""
@@ -64,6 +170,7 @@ def test_get_name(scanner):
     scanner.current_character = "a"
     name = scanner.get_name()
     assert isinstance(name, str)
+    assert name == "aDEF"
 
 def test_get_number(scanner):
     scanner.current_character = "1"
