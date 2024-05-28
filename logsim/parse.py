@@ -208,6 +208,7 @@ class Parser:
         # expected devicename 
         if symbol.type == self.scanner.NAME:
             input_device = self.devices.get_device(symbol.id)
+            monitor_device_id = symbol.id
             if input_device != None:
                 pass
             else:
