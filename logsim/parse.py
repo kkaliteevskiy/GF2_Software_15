@@ -423,6 +423,7 @@ class Parser:
             return False
 
     def error(self, err, msg):
+        self.scanner.print_error()
         print('Error on line ', self.scanner.current_line, end = ': ')
         print(msg)
         symbol = self.scanner.get_symbol()
