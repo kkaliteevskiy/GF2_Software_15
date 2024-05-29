@@ -138,14 +138,35 @@ class Scanner:
         """Print the current input line with a marker to show the error position."""
         new_file = open(self.path, 'r')
         lines = new_file.readlines()
-        error_line = lines[self.current_line - 1]
-        print(error_line, end='')
-        if symbol.type in [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, self.EOF]:
-            print(' ' * (self.character_number - 1) + '^' * len(self.names.get_name_string(symbol.id))) 
-        else:
-            print(' ' * (self.character_number - 1 - len(self.names.get_name_string(symbol.id))) + '^' * len(self.names.get_name_string(symbol.id)))
-          
 
+        error_line = ''
+        error_index = 0
+        error_length = 0
+
+        if self.current_character == '\n':
+            error_line = lines[self.current_line - 2]
+            error_index = len(error_line) - 1
+        else:
+            error_line = lines[self.current_line - 1]
+            error_index = self.character_number - 1
+
+        if symbol.type in [None, self.SEMICOLON, self.EQUALS, self.DOT, self.EOF]:
+            length = 1
+        elif symbol.type == self.ARROW:
+            length = 2
+        elif symbol.type == self.NUMBER:
+            length = len(symbol.id)
+        else:
+            length = len(self.names.get_name_string(symbol.id))
+
+
+        print(error_line, end='')
+        print(' ' * (error_index - length) + '^' * length)
+        # if symbol.type == None: # in [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, self.EOF]:
+        #     print(' ' * error_index + '^') 
+        # else:
+        #     print(' ' * (error_index - length) + '^' * length)
+          
     def skip_spaces(self):
         """Skip over spaces and line breaks until 
         current_character is not whitespace."""

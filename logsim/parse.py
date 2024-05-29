@@ -53,18 +53,21 @@ class Parser:
 
         #get the first symbol fo the expression
         while symbol.type != self.scanner.EOF:
-            if self.names.get_name_string(symbol.id) in self.scanner.keywords_list:
-                if symbol.id == self.names.query('DEF'):
-                    self.parse_def()
-                elif symbol.id == self.names.query('CON'):
-                    if self.error_count == 0:
-                        self.parse_con()
+            if symbol.type == self.scanner.KEYWORD:
+                if self.names.get_name_string(symbol.id) in self.scanner.keywords_list:
+                    if symbol.id == self.names.query('DEF'):
+                        self.parse_def()
+                    elif symbol.id == self.names.query('CON'):
+                        if self.error_count == 0:
+                            self.parse_con()
+                        else:
+                            self.skip_statement()
+                    elif symbol.id == self.names.query('MONITOR'):
+                        self.parse_monitor()
                     else:
-                        self.skip_statement()
-                elif symbol.id == self.names.query('MONITOR'):
-                    self.parse_monitor()
+                        self.error(err = self.SYNTAX_ERROR, msg = 'Expected keyword DEF, CON or MONITOR. IF you see this message, you are in trouble.', symbol = symbol)
                 else:
-                    self.error(err = self.SYNTAX_ERROR, msg = 'Expected keyword DEF, CON or MONITOR. IF you see this message, you are in trouble.', symbol = symbol)
+                    self.error(err = self.SYNTAX_ERROR, msg = 'Expected keyword DEF, CON or MONITOR.', symbol = symbol)
             else:
                 self.error(err = self.SYNTAX_ERROR, msg = 'Expected keyword DEF, CON or MONITOR.', symbol = symbol)
 
@@ -106,7 +109,7 @@ class Parser:
 
         # expected devicetype
         symbol = self.scanner.get_symbol()
-        if self.names.get_name_string(symbol.id) in self.scanner.devices_list:
+        if symbol.type == self.scanner.DEVICE:
             device_kind_id = symbol.id#expect this to be a string like "AND"
         else:
             self.error(err = self.SYNTAX_ERROR, msg = 'Expected device type.', symbol = symbol)
@@ -361,7 +364,7 @@ class Parser:
         if symbol.type == self.scanner.SEMICOLON:
             pass
         else:
-            self.error(err = self.devices.QUALIFIER_PRESENT, msg = 'Unexpected argument. Expected ";"', symbol = symbol)
+            self.error(err = self.SYNTAX_ERROR, msg = 'Unexpected argument. Expected ";"', symbol = symbol)
             return False
         
         return True
@@ -430,9 +433,12 @@ class Parser:
             return False
 
     def error(self, err, msg, symbol):
+
+        # if self.scanner.current_character == '\n':
+        #     self.scanner.current_line -= 1
         self.error_count += 1
         self.error_list.append(err)
-        print('Error on line ', self.scanner.current_line, ' at position ', self.scanner.character_number, ' : ', msg)
+        print('Error on line', self.scanner.current_line, 'at position', self.scanner.character_number, ':', msg)
         self.scanner.print_error(symbol)
         self.skip_statement()
         return err
