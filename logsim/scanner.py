@@ -70,7 +70,7 @@ class Scanner:
         [self.Q_ID, self.QBAR_ID] = self.names.lookup(self.outputs_list)
 
         self.current_character = ' '
-        self.current_line = 0
+        self.current_line = 1
         self.character_number = -1
 
 
@@ -134,15 +134,17 @@ class Scanner:
             raise FileNotFoundError(f"Error: File '{path}' not found.")
 
 
-    def print_error(self):
+    def print_error(self, symbol):
         """Print the current input line with a marker to show the error position."""
         new_file = open(self.path, 'r')
         lines = new_file.readlines()
         error_line = lines[self.current_line]
-        print(self.current_line)
-        print(error_line)
-        print(' ' * (self.character_number - 1) + '^')
-        print(f"Error: Invalid character '{self.current_character}' at line {self.current_line} position {self.character_number}.")  
+        print(error_line, end='')
+        if symbol.type in [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, self.EOF]:
+            print(' ' * (self.character_number - 1) + '^') 
+        else:
+            print(' ' * (self.character_number - 1 - len(self.names.get_name_stringy(symbol.id))) + '^')
+          
 
     def skip_spaces(self):
         """Skip over spaces and line breaks until 
