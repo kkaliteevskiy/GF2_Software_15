@@ -243,7 +243,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         """Handle text drawing operations."""
         GL.glColor3f(0.0, 0.0, 0.0)  # text is black
         GL.glRasterPos2f(x_pos, y_pos)
-        font = GLUT.GLUT_BITMAP_HELVETICA_12
+        font = GLUT.GLUT_BITMAP_HELVETICA_12 
 
         for character in text:
             if character == '\n':
@@ -343,17 +343,17 @@ class Gui(wx.Frame):
         side_sizer = wx.BoxSizer(wx.VERTICAL)
         
         main_sizer.Add(self.canvas, 5, wx.EXPAND | wx.ALL, 5)
-        main_sizer.Add(side_sizer, 1, wx.ALL, 5)
+        main_sizer.Add(side_sizer, 1, wx.EXPAND, 5)
         
-        side_sizer.Add(self.text, 1, wx.TOP, 10)
-        side_sizer.Add(self.spin, 1, wx.ALL, 5)
-        side_sizer.Add(self.run_button, 1, wx.ALL, 5)
-        side_sizer.Add(self.continue_button, 1, wx.ALL, 5)
+        side_sizer.Add(self.text, 0, wx.TOP, 10)
+        side_sizer.Add(self.spin, 0, wx.TOP, 5)
+        side_sizer.Add(self.run_button, 0, wx.TOP, 5)
+        side_sizer.Add(self.continue_button, 0, wx.TOP, 5)
         
         # Create a label for switches
         switches_label = wx.StaticText(scroll, label="Switches")
         switches_label.SetFont(font)  
-        scroll_sizer.Add(switches_label, 0, wx.TOP, 10)
+        scroll_sizer.Add(switches_label, 0, wx.ALL, 10)
 
         # Create Sliders for Switches
         self.switch_sliders = []
@@ -377,13 +377,13 @@ class Gui(wx.Frame):
             switch_sizer.Add(slider, 1, wx.ALL, 5)
             switch_sizer.Add(max_label, 0, wx.EXPAND | wx.ALL, 5)
             
-            scroll_sizer.Add(switch_sizer, 1, wx.EXPAND)
+            scroll_sizer.Add(switch_sizer, 1, wx.ALL)
         
         # Create checkboxes for signals
         self.monitored_signals, self.not_monitored_signals = self.monitors.get_signal_names()
         outputs_label = wx.StaticText(scroll, label="Outputs (tick to monitor)")
         outputs_label.SetFont(font)
-        scroll_sizer.Add(outputs_label, 0, wx.TOP, 10)
+        scroll_sizer.Add(outputs_label, 0, wx.ALL, 10)
 
         for signal in self.monitored_signals:
             checkbox = wx.CheckBox(scroll, label=signal)
@@ -396,9 +396,12 @@ class Gui(wx.Frame):
             checkbox.SetValue(False)  # Set checkbox as unticked
             self.Bind(wx.EVT_CHECKBOX, self.on_checkbox, checkbox)
             scroll_sizer.Add(checkbox, 1, wx.ALL, 5)
-
+        
+        
+        side_sizer.AddSpacer(10)
         scroll.SetSizer(scroll_sizer)
-        side_sizer.Add(scroll, 1, wx.EXPAND)
+        side_sizer.Add(scroll, 1, wx.EXPAND | wx.RIGHT, 5)
+        side_sizer.AddSpacer(10)
         self.SetSizeHints(500, 500)
         self.SetSizer(main_sizer)
         self.Layout()
