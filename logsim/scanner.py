@@ -138,12 +138,12 @@ class Scanner:
         """Print the current input line with a marker to show the error position."""
         new_file = open(self.path, 'r')
         lines = new_file.readlines()
-        error_line = lines[self.current_line]
+        error_line = lines[self.current_line - 1]
         print(error_line, end='')
         if symbol.type in [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, self.EOF]:
-            print(' ' * (self.character_number - 1) + '^') 
+            print(' ' * (self.character_number - 1) + '^' * len(self.names.get_name_string(symbol.id))) 
         else:
-            print(' ' * (self.character_number - 1 - len(self.names.get_name_stringy(symbol.id))) + '^')
+            print(' ' * (self.character_number - 1 - len(self.names.get_name_string(symbol.id))) + '^' * len(self.names.get_name_string(symbol.id)))
           
 
     def skip_spaces(self):
