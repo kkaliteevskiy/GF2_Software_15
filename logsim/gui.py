@@ -47,6 +47,8 @@ class MyGLCanvas(wxcanvas.GLCanvas):
 
     render_text(self, text, x_pos, y_pos): Handles text drawing
                                            operations.
+    
+    display_signals_gui(self): Draws the signal trace(s) on the canvas.
     """
 
     def __init__(self, parent, devices, monitors, id, pos, size):
