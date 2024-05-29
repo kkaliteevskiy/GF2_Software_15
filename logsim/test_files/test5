@@ -1,0 +1,4 @@
+DEF A1 = AND 16;
+DEF A1 = NAND 10;
+DEF A2 = CLK 2;
+DEF A3 = 24;

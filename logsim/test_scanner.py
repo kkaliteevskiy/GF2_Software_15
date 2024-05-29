@@ -1,4 +1,3 @@
-
 import pytest
 from names import Names
 from scanner import Scanner, Symbol
@@ -48,7 +47,7 @@ def test_get_symbol_1(scanner):
     string = scanner.names.get_name_string(symbol.id)
     assert string == "DEF"
     assert symbol.type == scanner.KEYWORD
-    assert symbol.line == 0
+    assert symbol.line == 1
     assert symbol.position == 3
 
     symbol = scanner.get_symbol() # G1
@@ -56,7 +55,7 @@ def test_get_symbol_1(scanner):
     assert def_string == "G1"
     assert symbol.type == 9
     assert symbol.type == scanner.NAME
-    assert symbol.line == 0
+    assert symbol.line == 1
     assert symbol.position == 6
 
     symbol = scanner.get_symbol() # =
@@ -99,32 +98,32 @@ def test_get_symbol_3(scanner_edge):
     symbol = scanner_edge.get_symbol() # $
     assert symbol.type == None
     assert symbol.id == None
-    assert symbol.line == 0
+    assert symbol.line == 1
     assert symbol.position == 12
 
     symbol = scanner_edge.get_symbol() # &
     assert symbol.type == None
     assert symbol.id == None
-    assert symbol.line == 0
+    assert symbol.line == 1
     assert symbol.position == 15
 
 
     symbol = scanner_edge.get_symbol() # ab
-    assert symbol.line == 0
+    assert symbol.line == 1
     assert symbol.position == 17
 
     symbol = scanner_edge.get_symbol() # =
-    assert symbol.line == 0
+    assert symbol.line == 1
     assert symbol.position == 18
 
     symbol = scanner_edge.get_symbol() # =
-    assert symbol.line == 0
+    assert symbol.line == 1
     assert symbol.position == 19
 
     symbol = scanner_edge.get_symbol() # AND
     assert symbol.type == scanner_edge.DEVICE
     assert symbol.id == 5
-    assert symbol.line == 0
+    assert symbol.line == 1
     assert symbol.position == 23
     
 

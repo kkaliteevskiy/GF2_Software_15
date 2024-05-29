@@ -1,0 +1,4 @@
+DEF G1 = AND 2;
+DEF Q1=DTYPE
+CON Q1.Q -> AND.I1; #trial run
+CON;
