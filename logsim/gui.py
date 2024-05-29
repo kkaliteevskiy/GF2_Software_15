@@ -113,7 +113,9 @@ class MyGLCanvas(wxcanvas.GLCanvas):
 
     def display_signals_gui(self):
         """
-        Draw the signal trace(s) on the canvas. This method sets the current context,
+        Draw the signal trace(s) on the canvas.
+        
+        This method sets the current context,
         initializes the GL if not already done, clears the buffer, calculates the margin,
         and iterates over the monitors dictionary to draw the signal traces. Finally,
         it flushes the graphics pipeline and swaps the buffers.
@@ -423,8 +425,7 @@ class Gui(wx.Frame):
         self.canvas.display_signals_gui()
 
     def on_run_button(self, event):
-        """Handle the event when the user clicks the run button.
-        Run the simulation from scratch."""
+        """Handle the event when the user clicks the run button. Run the simulation from scratch."""
         self.cycles_completed = 0
         cycles = self.spin.GetValue()
         #self.run_simulation(cycles)
@@ -466,8 +467,7 @@ class Gui(wx.Frame):
         self.canvas.display_signals_gui()
 
     def on_checkbox(self, event):
-        """Handle the event when the user checks or unchecks a checkbox.
-        Monitor or zap the output signal accordingly."""
+        """Handle the event when the user checks or unchecks a checkbox. Monitor or zap the output signal accordingly."""
         checkbox = event.GetEventObject()
         signal = checkbox.GetLabel()
         is_checked = checkbox.IsChecked()
@@ -514,8 +514,7 @@ class Gui(wx.Frame):
                 print("Error! Could not zap monitor.")
     
     def on_slider_change(self, event, index):
-        """Handle the event when the user changes the slider value.
-         Set the switch value accordingly."""
+        """Handle the event when the user changes the slider value. Set the switch value accordingly."""
         slider = event.GetEventObject()
         value = slider.GetValue()
         self.devices.set_switch(index, value)
