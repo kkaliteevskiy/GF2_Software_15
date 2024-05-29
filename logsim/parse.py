@@ -11,7 +11,6 @@ Parser - parses the definition file and builds the logic network.
 
 
 class Parser:
-
     """Parse the definition file and build the logic network.
 
     The parser deals with error handling. It analyses the syntactic and
@@ -77,12 +76,10 @@ class Parser:
         return True
     
     def parse_def(self):
-        '''Parse the DEF statement
-        EBNF: device = 'DEF', devicename, '=', devicetype, deviceproperty, ';' ;'''
+        """Parse the DEF statement.
 
-        device_name = None
-        device_kind = None
-        device_property = None
+        EBNF: device = 'DEF', devicename, '=', devicetype, deviceproperty, ';' ;.
+        """
         device_id = None
         
         symbol = self.scanner.get_symbol()
@@ -139,7 +136,10 @@ class Parser:
         return True
 
     def parse_con(self):
-        '''connection = 'CON', devicename, ['.', output], '->', devicename, '.',  input, ';'; '''
+        """Parse the CON statement.
+
+        Connection = 'CON', devicename, ['.', output], '->', devicename, '.',  input, ';'; .
+        """
         output_device = None
         output_device_id = None
         input_device = None
@@ -198,7 +198,7 @@ class Parser:
                         if symbol.id in input_device.inputs.keys():
                             input_port_id = symbol.id
                         else:
-                            self.error(err = self.network.DEVICE_ABSENT, msg = 'Error: Expected input pin ', symbol = symbol)
+                            self.error(err = self.network.PORT_ABSENT, msg = 'Error: Expected input pin ', symbol = symbol)
                             return False
                     else:
                         self.error(err = self.network.DEVICE_ABSENT, msg = 'Device not defined.', symbol = symbol)
@@ -228,6 +228,10 @@ class Parser:
         return True
 
     def parse_monitor(self):
+        """Parse a monitor statement.
+
+        monitor = 'MONITOR', devicename, ['.', output], ';';.
+        """
         monitor_device_id = None
         monitor_port_id = None
 
@@ -278,7 +282,7 @@ class Parser:
 
     #parse devices
     def parse_and(self, device_id, device_kind):
-
+        """Parse the AND device."""
         symbol = self.scanner.get_symbol()
 
         if symbol.type == self.scanner.NUMBER:
@@ -302,7 +306,7 @@ class Parser:
         return True
 
     def parse_or(self, device_id, device_kind):
-        
+        """Parse the OR device."""
         symbol = self.scanner.get_symbol()
         if symbol.type == self.scanner.NUMBER:
             no_of_inputs = int(symbol.id)
@@ -324,7 +328,7 @@ class Parser:
         return True
 
     def parse_nor(self, device_id, device_kind):
-
+        """Parse the NOR device."""
         symbol = self.scanner.get_symbol()
         if symbol.type == self.scanner.NUMBER:
             no_of_inputs = int(symbol.id)
@@ -347,7 +351,7 @@ class Parser:
 
 
     def parse_nand(self, device_id, device_kind):
-        
+        """Parse the NAND device."""
         symbol = self.scanner.get_symbol()
         if symbol.type == self.scanner.NUMBER:
             no_of_inputs = int(symbol.id)
@@ -371,7 +375,7 @@ class Parser:
 
 
     def parse_xor(self, device_id, device_kind):
-
+        """Parse the XOR device."""
         self.devices.make_device(device_id, device_kind)
 
         symbol = self.scanner.get_symbol()
@@ -382,17 +386,18 @@ class Parser:
             return False
     
     def parse_dtype(self, device_id, device_kind):
-
+        """Parse the DTYPE device."""
         self.devices.make_device(device_id, device_kind)
 
         symbol = self.scanner.get_symbol()
         if symbol.type == self.scanner.SEMICOLON:
             pass
         else:
-            self.error(err = self.devices.QUALIFIER_PRESENT, msg = 'Unexpected argument. Expected ";"', symbol = symbol)
+            self.error(err = self.SYNTAX_ERROR, msg = 'Unexpected argument. Expected ";"', symbol = symbol)
             return False
 
     def parse_clock(self, device_id, device_kind):
+        """Parse the CLOCK device."""
         symbol = self.scanner.get_symbol()
         if symbol.type == self.scanner.NUMBER:
             half_period = int(symbol.id)
@@ -410,7 +415,7 @@ class Parser:
             return False
 
     def parse_switch(self, device_id, device_kind):
-
+        """Parse the SWITCH device."""
         symbol = self.scanner.get_symbol()
         if symbol.type == self.scanner.NUMBER:
             state = int(symbol.id)
@@ -433,9 +438,7 @@ class Parser:
             return False
 
     def error(self, err, msg, symbol):
-
-        # if self.scanner.current_character == '\n':
-        #     self.scanner.current_line -= 1
+        """Print an error message and skip the rest of the statement."""
         self.error_count += 1
         self.error_list.append(err)
         print('Error on line', self.scanner.current_line, 'at position', self.scanner.character_number, ':', msg)
@@ -444,6 +447,7 @@ class Parser:
         return err
 
     def skip_statement(self):
+        """Skip the rest of the statement."""
         symbol = self.scanner.get_symbol()
         while symbol.type != self.scanner.SEMICOLON and symbol.type != self.scanner.EOF:
             symbol = self.scanner.get_symbol()

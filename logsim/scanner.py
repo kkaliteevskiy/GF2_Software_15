@@ -11,7 +11,6 @@ Symbol - encapsulates a symbol and stores its properties.
 
 
 class Symbol:
-
     """Encapsulate a symbol and store its properties.
 
     Parameters
@@ -32,7 +31,6 @@ class Symbol:
 
 
 class Scanner:
-
     """Read circuit definition file and translate the characters into symbols.
 
     Once supplied with the path to a valid definition file, the scanner
@@ -159,8 +157,10 @@ class Scanner:
         else:
             length = len(self.names.get_name_string(symbol.id))
 
-
         print(error_line, end='')
+        if not error_line.endswith('\n'):
+            print('')
+
         print(' ' * (error_index - length) + '^' * length)
         # if symbol.type == None: # in [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, self.EOF]:
         #     print(' ' * error_index + '^') 
@@ -168,8 +168,7 @@ class Scanner:
         #     print(' ' * (error_index - length) + '^' * length)
           
     def skip_spaces(self):
-        """Skip over spaces and line breaks until 
-        current_character is not whitespace."""
+        """Skip over spaces and line breaks until current_character is not whitespace."""
         while True:
             if self.current_character.isspace():
                 self.advance()
@@ -183,7 +182,7 @@ class Scanner:
 
 
     def advance(self):
-        """reads one further character into the document"""
+        """Read one further character into the document."""
         self.current_character = self.file.read(1)
         self.character_number += 1
 
@@ -194,11 +193,7 @@ class Scanner:
         return self.current_character
 
     def get_name(self):
-        """
-        Return the next name string in input file and place the next non alphanumeric character in current_character.
-        Return none if no name is found and an empty string in current_character if end of file is reached.
-        """
-    
+        """Return the next name string in input file and place the next non alphanumeric character in current_character. Return none if no name is found and an empty string in current_character if end of file is reached."""
         name = self.current_character
         while True:
             self.current_character = self.advance()
@@ -209,10 +204,7 @@ class Scanner:
             
     
     def get_number(self):
-        """
-        Seek the next number in input_file.
-        Return the number (or None) and the next non-numeric character.
-        """
+        """Seek the next number in input_file. Return the number (or None) and the next non-numeric character."""
         number = self.current_character
         while True:
             self.current_character = self.advance()
