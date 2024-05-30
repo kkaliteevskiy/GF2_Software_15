@@ -24,13 +24,20 @@ class Names:
 
     Public methods
     -------------
-    unique_error_codes(self, num_error_codes): Returns a list of unique integer error codes.
+    unique_error_codes(self, num_error_codes):
+        Returns a list of unique integer error codes.
 
-    query(self, name_string): Returns the corresponding name ID for the name string. Returns None if the string is not present.
+    query(self, name_string):
+        Returns the corresponding name ID for the name string.
+        Returns None if the string is not present.
 
-    lookup(self, name_string_list): Returns a list of name IDs for each name string. Adds a name if not already present.
+    lookup(self, name_string_list):
+        Returns a list of name IDs for each name string.
+        Adds a name if not already present.
 
-    get_name_string(self, name_id): Returns the corresponding name string for the name ID. Returns None if the ID is not present.
+    get_name_string(self, name_id):
+        Returns the corresponding name string for the name ID.
+        Returns None if the ID is not present.
     """
 
     def __init__(self):

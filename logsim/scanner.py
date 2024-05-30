@@ -54,30 +54,37 @@ class Scanner:
         self.file = self.open_file(path)
         self.path = path
         self.names = names
-        self.symbol_type_list = [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, 
-                                 self.KEYWORD, self.DEVICE, self.INPUT, self.OUTPUT, 
-                                 self.NUMBER, self.NAME, self.EOF] = range(11)
-        self.keywords_list = ['DEF', 'CON', 'MONITOR']           
-        self.devices_list = ['CLOCK', 'SWITCH', 'AND', 'NAND', 'OR', 'NOR', 'XOR', 'DTYPE']                     
+        self.symbol_type_list = [self.SEMICOLON, self.EQUALS, self.DOT,
+                                 self.ARROW, self.KEYWORD, self.DEVICE,
+                                 self.INPUT, self.OUTPUT, self.NUMBER,
+                                 self.NAME, self.EOF] = range(11)
+        self.keywords_list = ['DEF', 'CON', 'MONITOR']
+        self.devices_list = ['CLOCK', 'SWITCH', 'AND',
+                             'NAND', 'OR', 'NOR', 'XOR', 'DTYPE']
         self.inputs_list = ['I', 'DATA', 'CLK', 'SET', 'CLEAR']
         self.outputs_list = ['Q', 'QBAR']
         # add the keywords into name table
-        [self.DEF_ID, self.CONNECT_ID, self.MONITOR_ID] = self.names.lookup(self.keywords_list)
-        [self.CLOCK_ID, self.SWITCH_ID, self.AND_ID, self.NAND_ID, self.OR_ID, self.NOR_ID, self.XOR_ID, self.DTYPE_ID] = self.names.lookup(self.devices_list)
-        [self.I_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.CLEAR_ID] = self.names.lookup(self.inputs_list)
+        [self.DEF_ID, self.CONNECT_ID, self.MONITOR_ID] = self.names.lookup(
+            self.keywords_list)
+        [
+            self.CLOCK_ID, self.SWITCH_ID, self.AND_ID, self.NAND_ID,
+            self.OR_ID, self.NOR_ID, self.XOR_ID, self.DTYPE_ID
+        ] = self.names.lookup(self.devices_list)
+        [
+            self.I_ID, self.DATA_ID, self.CLK_ID, self.SET_ID, self.CLEAR_ID
+        ] = self.names.lookup(self.inputs_list)
         [self.Q_ID, self.QBAR_ID] = self.names.lookup(self.outputs_list)
 
         self.current_character = ' '
         self.current_line = 1
         self.character_number = -1
 
-
     def get_symbol(self):
         """Translate the next sequence of characters into a symbol."""
         symbol = Symbol()
         self.skip_spaces()
 
-        if self.current_character.isalpha(): # NAME or KEYWORD or device or i/o
+        if self.current_character.isalpha():  # NAME/ KEYWORD/ device/ i/o
             name_string = self.get_name()
             if name_string in self.keywords_list:
                 symbol.type = self.KEYWORD
@@ -89,12 +96,14 @@ class Scanner:
                 symbol.type = self.OUTPUT
             else:
                 symbol.type = self.NAME
-            [symbol.id] = self.names.lookup([name_string]) # returns terminal IDs or add names to table, but why is this a list?
+            [symbol.id] = self.names.lookup([name_string])
+            # returns terminal IDs or add names to table
 
-        elif self.current_character.isdigit(): # number
-            symbol.id = self.get_number() # symbol ID is the number (don't need ID for number, not in name table)
+        elif self.current_character.isdigit():  # number
+            symbol.id = self.get_number()
+            # symbol ID is the number (no ID for number, not in name table)
             symbol.type = self.NUMBER
-        
+
         elif self.current_character == '=':
             symbol.type = self.EQUALS
             self.advance()
@@ -102,7 +111,7 @@ class Scanner:
         elif self.current_character == ';':
             symbol.type = self.SEMICOLON
             self.advance()
-        
+
         elif self.current_character == '.':
             symbol.type = self.DOT
             self.advance()
@@ -114,13 +123,13 @@ class Scanner:
                 self.advance()
             else:
                 self.advance()
-        
-        elif self.current_character == '': # end of file
+
+        elif self.current_character == '':  # end of file
             symbol.type = self.EOF
 
         else:
             self.advance()
-        
+
         symbol.line, symbol.position = self.current_line, self.character_number
         return symbol
 
@@ -130,7 +139,6 @@ class Scanner:
             return open(path, 'r')  # Return file object
         except FileNotFoundError:
             raise FileNotFoundError(f"Error: File '{path}' not found.")
-
 
     def print_error(self, symbol):
         """Print the current input line with a marker to show the error position."""
@@ -148,7 +156,8 @@ class Scanner:
             error_line = lines[self.current_line - 1]
             error_index = self.character_number - 1
 
-        if symbol.type in [None, self.SEMICOLON, self.EQUALS, self.DOT, self.EOF]:
+        if symbol.type in [None, self.SEMICOLON,
+                           self.EQUALS, self.DOT, self.EOF]:
             length = 1
         elif symbol.type == self.ARROW:
             length = 2
@@ -160,13 +169,8 @@ class Scanner:
         print(error_line, end='')
         if not error_line.endswith('\n'):
             print('')
-
         print(' ' * (error_index - length) + '^' * length)
-        # if symbol.type == None: # in [self.SEMICOLON, self.EQUALS, self.DOT, self.ARROW, self.EOF]:
-        #     print(' ' * error_index + '^') 
-        # else:
-        #     print(' ' * (error_index - length) + '^' * length)
-          
+
     def skip_spaces(self):
         """Skip over spaces and line breaks until current_character is not whitespace."""
         while True:
@@ -180,7 +184,6 @@ class Scanner:
             else:
                 break
 
-
     def advance(self):
         """Read one further character into the document."""
         self.current_character = self.file.read(1)
@@ -189,20 +192,21 @@ class Scanner:
         if self.current_character == '\n':
             self.current_line += 1
             self.character_number = 0
-        #print(self.character_number)
         return self.current_character
 
     def get_name(self):
-        """Return the next name string in input file and place the next non alphanumeric character in current_character. Return none if no name is found and an empty string in current_character if end of file is reached."""
+        """Return next name string and place the next nonalphanumeric character in current_character."""
         name = self.current_character
         while True:
             self.current_character = self.advance()
-            if self.current_character.isalnum() or self.character_number == '_':
+            if (
+                self.current_character.isalnum() or
+                self.character_number == '_'
+            ):
                 name = name + self.current_character
             else:
                 return name
-            
-    
+
     def get_number(self):
         """Seek the next number in input_file. Return the number (or None) and the next non-numeric character."""
         number = self.current_character
