@@ -75,6 +75,10 @@ class Scanner:
         ] = self.names.lookup(self.inputs_list)
         [self.Q_ID, self.QBAR_ID] = self.names.lookup(self.outputs_list)
 
+        # Maintenance task
+        self.devices_list.append('RC')
+        [self.RC_ID] = self.names.lookup(['RC'])
+
         self.current_character = ' '
         self.current_line = 1
         self.character_number = -1

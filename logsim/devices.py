@@ -41,6 +41,7 @@ class Device:
         self.clock_counter = None
         self.switch_state = None
         self.dtype_memory = None
+        self.fall_time = None
 
 
 class Devices:
@@ -123,6 +124,10 @@ class Devices:
                                 self.DATA_ID] = self.names.lookup(dtype_inputs)
         self.dtype_output_ids = [
             self.Q_ID, self.QBAR_ID] = self.names.lookup(dtype_outputs)
+        
+        # Maintenance task
+        self.device_types.append("RC")
+        [self.RC] = self.names.lookup(["RC"])
 
         self.max_gate_inputs = 16
 
@@ -259,12 +264,20 @@ class Devices:
         for output_id in self.dtype_output_ids:
             self.add_output(device_id, output_id)
         self.cold_startup()  # D-type initialised to a random state
+    
+    def make_rc(self, device_id, fall_time):
+        """Make a RC device."""
+        self.add_device(device_id, self.RC)
+        device = self.get_device(device_id)
+        device.fall_time = fall_time
+        self.add_output(device_id, output_id=None, signal=self.HIGH)
 
     def cold_startup(self):
-        """Simulate cold start-up of D-types and clocks.
+        """Simulate cold start-up of D-types, clocks and RC components.
 
         Set the memory of the D-types to a random state and make the clocks
-        begin from a random point in their cycles.
+        begin from a random point in their cycles. 
+        The RC components are initialised to HIGH.
         """
         for device in self.devices_list:
             if device.device_kind == self.D_TYPE:
@@ -277,6 +290,8 @@ class Devices:
                 # Initialise it to a random point in its cycle.
                 device.clock_counter = \
                     random.randrange(device.clock_half_period)
+            elif device.device_kind == self.RC:
+                device.outputs[None] = self.HIGH
 
     def make_device(self, device_id, device_kind, device_property=None):
         """Create the specified device.
@@ -286,6 +301,15 @@ class Devices:
         # Device has already been added to the devices_list
         if self.get_device(device_id) is not None:
             error_type = self.DEVICE_PRESENT
+
+        elif device_kind == self.RC:
+            # Device property is the switch initial state: 0(LOW) or 1(HIGH)
+            if device_property is None:
+                error_type = self.NO_QUALIFIER
+            else:
+                self.make_rc(device_id, device_property)
+                error_type = self.NO_ERROR
+            pass
 
         elif device_kind == self.SWITCH:
             # Device property is the switch initial state: 0(LOW) or 1(HIGH)

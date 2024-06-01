@@ -65,6 +65,7 @@ class Network:
         """Initialise network errors and the steady_state variable."""
         self.names = names
         self.devices = devices
+        self.global_counter = 0
 
         [self.NO_ERROR, self.INPUT_TO_INPUT, self.OUTPUT_TO_OUTPUT,
          self.INPUT_CONNECTED, self.PORT_ABSENT,
@@ -214,6 +215,25 @@ class Network:
         else:
             device.outputs[None] = updated_signal
             return True
+    
+    def execute_rc(self, device_id):
+        device = self.devices.get_device(device_id)
+        output_signal = device.outputs[None]
+
+        if self.global_counter < device.fall_time:
+            output_signal = self.devices.HIGH
+        else:
+            output_signal = self.devices.LOW
+
+        # Update and store the new signal
+        signal = self.get_output_signal(device_id, None)
+        target = output_signal
+        updated_signal = self.update_signal(signal, target)
+        if updated_signal is None:  # if the update is unsuccessful
+            return False
+        device.outputs[None] = updated_signal
+        return True
+
 
     def execute_gate(self, device_id, x=None, y=None):
         """Simulate a logic gate and update its output signal value.
@@ -360,6 +380,7 @@ class Network:
         nand_devices = self.devices.find_devices(self.devices.NAND)
         nor_devices = self.devices.find_devices(self.devices.NOR)
         xor_devices = self.devices.find_devices(self.devices.XOR)
+        rc_devices = self.devices.find_devices(self.devices.RC)
 
         # This sets clock signals to RISING or FALLING, where necessary
         self.update_clocks()
@@ -403,6 +424,11 @@ class Network:
             for device_id in xor_devices:  # execute XOR devices
                 if not self.execute_gate(device_id, None, None):
                     return False
+                
+            for device_id in rc_devices:
+                if not self.execute_rc(device_id):# TODO finished here
+                    return False
             if self.steady_state:
                 break
+        self.global_counter += 1
         return self.steady_state

@@ -58,7 +58,7 @@ class Parser:
                         self.parse_def()
                     elif symbol.id == self.names.query('CON'):
                         if self.error_count == 0:
-                            self.parse_con()
+                            self.parse_con() 
                         else:
                             self.skip_statement()
                     elif symbol.id == self.names.query('MONITOR'):
@@ -76,10 +76,12 @@ class Parser:
         return True
     
     def parse_def(self):
-        """Parse the DEF statement.
+        '''Parse the DEF statement
+        EBNF: device = 'DEF', devicename, '=', devicetype, deviceproperty, ';' ;'''
 
-        EBNF: device = 'DEF', devicename, '=', devicetype, deviceproperty, ';' ;.
-        """
+        device_name = None
+        device_kind = None
+        device_property = None
         device_id = None
         
         symbol = self.scanner.get_symbol()
@@ -107,7 +109,11 @@ class Parser:
         # expected devicetype
         symbol = self.scanner.get_symbol()
         if symbol.type == self.scanner.DEVICE:
-            device_kind_id = symbol.id#expect this to be a string like "AND"
+            if self.names.get_name_string(symbol.id) in self.scanner.devices_list:
+                device_kind_id = symbol.id#expect this to be a string like "AND"
+            else:
+                self.error(err = self.SYNTAX_ERROR, msg = 'Expected device type.', symbol = symbol)
+                return False
         else:
             self.error(err = self.SYNTAX_ERROR, msg = 'Expected device type.', symbol = symbol)
             return False
@@ -128,6 +134,8 @@ class Parser:
             self.parse_clock(device_id, self.devices.CLOCK)
         elif self.names.get_name_string(device_kind_id) == 'SWITCH':
             self.parse_switch(device_id, self.devices.SWITCH)
+        elif self.names.get_name_string(device_kind_id) == 'RC':
+            self.parse_rc(device_id, self.devices.RC)
         else:
             self.error(err = self.SYNTAX_ERROR, msg = 'Unknown device type. If you see this message, you are in trouble.', symbol = symbol)
             return False
@@ -279,6 +287,31 @@ class Parser:
 
         return True
 
+
+    def parse_rc(self, device_id, device_kind):
+
+        symbol = self.scanner.get_symbol()
+
+        if symbol.type == self.scanner.NUMBER:
+            # fall time
+            fall_time = int(symbol.id)
+            if fall_time >= 0:
+                self.devices.make_device(device_id, device_kind, fall_time)
+            else:
+                self.error(err = self.devices.INVALID_QUALIFIER, msg = 'Expected fall time > 0', symbol = symbol)
+                return False
+        else:
+            self.error(err = self.devices.INVALID_QUALIFIER, msg = 'Expected fall time of type INT', symbol = symbol)
+            return False
+    
+        symbol = self.scanner.get_symbol()
+        if symbol.type == self.scanner.SEMICOLON:
+            pass
+        else:
+            self.error(err = self.SYNTAX_ERROR, msg = 'Expected ";"', symbol = symbol)
+            return False
+        return True
+    
 
     #parse devices
     def parse_and(self, device_id, device_kind):

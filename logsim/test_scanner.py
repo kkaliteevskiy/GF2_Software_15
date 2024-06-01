@@ -39,7 +39,7 @@ def test_scanner_initial(scanner):
     assert scanner.names.query('DEF') == 0
     assert scanner.names.lookup(['CON', 'DEF', 'MONITOR']) == [1, 0, 2]
     assert scanner.names.lookup(['Q', 'QBAR']) == [16, 17]
-    assert scanner.names.lookup(['G1', 'G2']) == [18, 19]
+    assert scanner.names.lookup(['G1', 'G2']) == [19, 20]
     assert scanner.names.get_name_string(14) == 'SET'
 
 
