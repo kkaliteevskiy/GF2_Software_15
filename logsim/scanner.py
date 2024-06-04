@@ -145,7 +145,7 @@ class Scanner:
             raise FileNotFoundError(f"Error: File '{path}' not found.")
 
     def print_error(self, symbol):
-        """Print the current input line with a marker to show the error position."""
+        """Print error line with a marker for position."""
         new_file = open(self.path, 'r')
         lines = new_file.readlines()
 
@@ -176,7 +176,7 @@ class Scanner:
         print(' ' * (error_index - length) + '^' * length)
 
     def skip_spaces(self):
-        """Skip over spaces and line breaks until current_character is not whitespace."""
+        """Skip whitespace."""
         while True:
             if self.current_character.isspace():
                 self.advance()
@@ -199,7 +199,7 @@ class Scanner:
         return self.current_character
 
     def get_name(self):
-        """Return next name string and place the next nonalphanumeric character in current_character."""
+        """Return next Name."""
         name = self.current_character
         while True:
             self.current_character = self.advance()
@@ -212,7 +212,11 @@ class Scanner:
                 return name
 
     def get_number(self):
-        """Seek the next number in input_file. Return the number (or None) and the next non-numeric character."""
+        """
+        Seek the next number in input_file.
+
+        Return the number (or None) and the next non-numeric character.
+        """
         number = self.current_character
         while True:
             self.current_character = self.advance()
