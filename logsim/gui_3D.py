@@ -23,7 +23,6 @@ from parse import Parser
 import argparse
 
 
-
 class MyGLCanvas(wxcanvas.GLCanvas):
     """Handle all drawing operations.
 
@@ -142,7 +141,6 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         GL.glEnable(GL.GL_LIGHT1)
         GL.glEnable(GL.GL_NORMALIZE)
 
-        
         # Viewing transformation - set the viewpoint back from the scene
         GL.glTranslatef(0.0, 0.0, -self.depth_offset)
 
@@ -169,16 +167,17 @@ class MyGLCanvas(wxcanvas.GLCanvas):
 
         for device_id, output_id in self.monitors.monitors_dictionary:
             monitor_name = self.devices.get_signal_name(device_id, output_id)
-            signal_list = self.monitors.monitors_dictionary[(device_id, output_id)]
+            signal_list = self.monitors.monitors_dictionary[(
+                device_id, output_id)]
             num_signals_list.append(len(signal_list))
-            
+
             # Render the monitor name at the start of the line.
             self.render_text(monitor_name, 0, y_pos, 0)
             x_pos = 40 + margin  # Starting x position for drawing signals.
             prev_y = y_pos
             cycle = 0
             for signal in signal_list:
-                GL.glColor3f(173/255, 216/255, 230/255)
+                GL.glColor3f(173 / 255, 216 / 255, 230 / 255)
 
                 if signal == self.devices.HIGH:
                     h = 20
@@ -193,23 +192,25 @@ class MyGLCanvas(wxcanvas.GLCanvas):
                     h = 2
                     self.draw_cuboid(x_pos, y_pos, 0, 20, 10, h)
                 elif signal == self.devices.BLANK:
-                    h = 0 
+                    h = 0
 
-                #self.draw_cuboid(x_pos, y, 10, 10, 10)
-                self.render_text("|", x_pos-20, -15, 0)
-                self.render_text(str(cycle), x_pos-20, 0, 0)
+                # self.draw_cuboid(x_pos, y, 10, 10, 10)
+                self.render_text("|", x_pos - 20, -15, 0)
+                self.render_text(str(cycle), x_pos - 20, 0, 0)
                 cycle += 1
-                
+
                 x_pos += 40  # Move to the next position for drawing.
             y_pos += 40  # Move to the next line for drawing.
         try:
             x_axis_length = max(num_signals_list) * 40
-        except:
+        except ValueError:
             x_axis_length = 0
         GL.glColor3f(0.0, 0.0, 0.0)  # Set color to black.
         GL.glBegin(GL.GL_LINES)  # Start drawing lines.
-        GL.glVertex3f(20 + margin, -15, 0)  # Vertex at the start of the x-axis.
-        GL.glVertex3f(20 + margin + x_axis_length, -15, 0)  # Vertex at the end of the x-axis.
+        # Vertex at the start of the x-axis.
+        GL.glVertex3f(20 + margin, -15, 0)
+        # Vertex at the end of the x-axis.
+        GL.glVertex3f(20 + margin + x_axis_length, -15, 0)
         GL.glEnd()  # End drawing lines.
 
         GL.glFlush()
@@ -221,7 +222,7 @@ class MyGLCanvas(wxcanvas.GLCanvas):
         Draw a cuboid at the specified position, with the specified
         dimensions.
         """
-       
+
         GL.glBegin(GL.GL_QUADS)
         GL.glNormal3f(0, -1, 0)
         GL.glVertex3f(x_pos - half_width, y_pos, z_pos - half_depth)
@@ -289,8 +290,8 @@ class MyGLCanvas(wxcanvas.GLCanvas):
             y = event.GetY() - self.last_mouse_y
             if event.LeftIsDown():
                 GL.glRotatef(math.sqrt((x * x) + (y * y)), y, x, 0)
-           # if event.MiddleIsDown():
-           #     GL.glRotatef((x + y), 0, 0, 1)
+            # if event.MiddleIsDown():
+            # GL.glRotatef((x + y), 0, 0, 1)
             if event.RightIsDown():
                 self.pan_x += x
                 self.pan_y -= y
@@ -330,12 +331,11 @@ class MyGLCanvas(wxcanvas.GLCanvas):
 
     def reset_view(self):
         """Reset the canvas view to the initial state."""
-        self.zoom = 1.0  
-        self.pan_x = -300.0  
-        self.pan_y = -300.0  
+        self.zoom = 1.0
+        self.pan_x = -300.0
+        self.pan_y = -300.0
         self.scene_rotate = np.identity(4, 'f')
-        self.init = False  
-        
+        self.init = False
 
 
 class Gui(wx.Frame):
@@ -360,9 +360,18 @@ class Gui(wx.Frame):
 
     on_text_box(self, event): Event handler for when the user enters text.
     """
-    QuitID=999
-    OpenID=998
-    def __init__(self, title, path, names, devices, network, monitors, cycles_completed):
+    QuitID = 999
+    OpenID = 998
+
+    def __init__(
+            self,
+            title,
+            path,
+            names,
+            devices,
+            network,
+            monitors,
+            cycles_completed):
         """Initialise widgets and layout."""
         super().__init__(parent=None, title=title, size=(800, 600))
 
@@ -380,7 +389,7 @@ class Gui(wx.Frame):
         self.devices = devices
         self.network = network
         self.monitors = monitors
-        self.cycles_completed = cycles_completed 
+        self.cycles_completed = cycles_completed
 
         # Configure the file menu
         fileMenu = wx.Menu()
@@ -392,30 +401,46 @@ class Gui(wx.Frame):
         self.SetMenuBar(menuBar)
 
         # Canvas for drawing signals
-        self.canvas = MyGLCanvas(self, devices, monitors, wx.ID_ANY, wx.DefaultPosition, wx.Size(800, 600))
+        self.canvas = MyGLCanvas(
+            self,
+            devices,
+            monitors,
+            wx.ID_ANY,
+            wx.DefaultPosition,
+            wx.Size(
+                800,
+                600))
 
         # Set font
-        font = wx.Font(10, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False, "Verdana")
+        font = wx.Font(
+            10,
+            wx.FONTFAMILY_DEFAULT,
+            wx.FONTSTYLE_NORMAL,
+            wx.FONTWEIGHT_BOLD,
+            False,
+            "Verdana")
 
         # Configure the widgets
-        self.switch_button = wx.Button(self, label="Switch to 2D", size=(300, 25))
+        self.switch_button = wx.Button(
+            self, label="Switch to 2D", size=(300, 25))
         self.text = wx.StaticText(self, wx.ID_ANY, "Cycles")
         self.text.SetFont(font)
         self.spin = wx.SpinCtrl(self, wx.ID_ANY, "10")
         self.run_button = wx.Button(self, wx.ID_ANY, "Run")
-        #self.text_box = wx.TextCtrl(self, wx.ID_ANY, "",
-                                   # style=wx.TE_PROCESS_ENTER)
+        # self.text_box = wx.TextCtrl(self, wx.ID_ANY, "",
+        # style=wx.TE_PROCESS_ENTER)
         self.continue_button = wx.Button(self, wx.ID_ANY, "Continue")
         self.reset_view_button = wx.Button(self, wx.ID_ANY, "Reset View")
 
         # Edit switch to 2D button
-        self.switch_button.SetBackgroundColour(wx.Colour(173, 216, 230))  # Set the color of the button to light blue
+        # Set the color of the button to light blue
+        self.switch_button.SetBackgroundColour(wx.Colour(173, 216, 230))
 
         # Bind events to widgets
         self.Bind(wx.EVT_MENU, self.on_menu)
         self.spin.Bind(wx.EVT_SPINCTRL, self.on_spin)
         self.run_button.Bind(wx.EVT_BUTTON, self.on_run_button)
-        #self.text_box.Bind(wx.EVT_TEXT_ENTER, self.on_text_box)
+        # self.text_box.Bind(wx.EVT_TEXT_ENTER, self.on_text_box)
         self.continue_button.Bind(wx.EVT_BUTTON, self.on_continue_button)
         self.reset_view_button.Bind(wx.EVT_BUTTON, self.on_reset_view_button)
         self.Bind(wx.EVT_CLOSE, self.on_close_window)
@@ -423,7 +448,7 @@ class Gui(wx.Frame):
 
         # Create a scrolled window for the switches and signals
         scroll = wx.ScrolledWindow(self, -1, size=wx.Size(300, 400))
-        scroll.SetScrollbars(0, 16, 50, 15)  
+        scroll.SetScrollbars(0, 16, 50, 15)
         self.scroll_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Configure sizers for layout
@@ -437,28 +462,38 @@ class Gui(wx.Frame):
         side_sizer.Add(self.text, 1, wx.TOP, 10)
         side_sizer.Add(self.spin, 0, wx.ALL, 5)
         side_sizer.Add(self.run_button, 0, wx.TOP, 5)
-        #side_sizer.Add(self.text_box, 1, wx.ALL, 5)
+        # side_sizer.Add(self.text_box, 1, wx.ALL, 5)
         side_sizer.Add(self.continue_button, 0, wx.TOP, 5)
         side_sizer.Add(self.reset_view_button, 0, wx.TOP, 5)
 
         # Create a label for switches
         switches_label = wx.StaticText(scroll, label="Switches")
-        switches_label.SetFont(font)  
+        switches_label.SetFont(font)
         self.scroll_sizer.Add(switches_label, 0, wx.ALL, 10)
 
         # Create Sliders for Switches
         self.switch_sliders = []
         switches = self.devices.find_devices(device_kind=self.devices.SWITCH)
-        
+
         for switch in switches:
             switch_name = self.names.get_name_string(switch)
             switch_device = self.devices.get_device(switch)
             label = wx.StaticText(scroll, label=switch_name)
             label.SetFont(font)
-            slider = wx.Slider(scroll, value=switch_device.switch_state, minValue=0, maxValue=1, style=wx.SL_HORIZONTAL)
-            slider.Bind(wx.EVT_SLIDER, lambda event, index=switch: self.on_slider_change(event, index))
+            slider = wx.Slider(
+                scroll,
+                value=switch_device.switch_state,
+                minValue=0,
+                maxValue=1,
+                style=wx.SL_HORIZONTAL)
+            slider.Bind(
+                wx.EVT_SLIDER,
+                lambda event,
+                index=switch: self.on_slider_change(
+                    event,
+                    index))
             self.switch_sliders.append(slider)
-            
+
             min_label = wx.StaticText(scroll, label="0")
             max_label = wx.StaticText(scroll, label="1")
 
@@ -467,12 +502,14 @@ class Gui(wx.Frame):
             switch_sizer.Add(min_label, 0, wx.ALIGN_LEFT | wx.ALL, 5)
             switch_sizer.Add(slider, 1, wx.ALL, 5)
             switch_sizer.Add(max_label, 0, wx.EXPAND | wx.ALL, 5)
-            
+
             self.scroll_sizer.Add(switch_sizer, 1, wx.ALL)
-        
+
         # Create checkboxes for signals
-        self.monitored_signals, self.not_monitored_signals = self.monitors.get_signal_names()
-        outputs_label = wx.StaticText(scroll, label="Outputs (tick to monitor)")
+        signals = self.monitors.get_signal_names()
+        self.monitored_signals, self.not_monitored_signals = signals
+        outputs_label = wx.StaticText(
+            scroll, label="Outputs (tick to monitor)")
         outputs_label.SetFont(font)
         self.scroll_sizer.Add(outputs_label, 0, wx.ALL, 10)
 
@@ -481,19 +518,31 @@ class Gui(wx.Frame):
         for signal in self.monitored_signals:
             checkbox = wx.CheckBox(scroll, label=signal)
             checkbox.SetValue(True)  # Set checkbox as ticked
-            self.Bind(wx.EVT_CHECKBOX, lambda event, cb=checkbox: self.on_checkbox(event, cb), checkbox)
+            self.Bind(
+                wx.EVT_CHECKBOX,
+                lambda event,
+                cb=checkbox: self.on_checkbox(
+                    event,
+                    cb),
+                checkbox)
             self.checkboxes.append(checkbox)
 
         for signal in self.not_monitored_signals:
             checkbox = wx.CheckBox(scroll, label=signal)
             checkbox.SetValue(False)  # Set checkbox as unticked
-            self.Bind(wx.EVT_CHECKBOX, lambda event, cb=checkbox: self.on_checkbox(event, cb), checkbox)
+            self.Bind(
+                wx.EVT_CHECKBOX,
+                lambda event,
+                cb=checkbox: self.on_checkbox(
+                    event,
+                    cb),
+                checkbox)
             self.checkboxes.append(checkbox)
 
         # Add checkboxes to sizer
         for checkbox in self.checkboxes:
             self.scroll_sizer.Add(checkbox, 1, wx.ALL, 5)
-        
+
         side_sizer.AddSpacer(10)
         scroll.SetSizer(self.scroll_sizer)
         side_sizer.Add(scroll, 1, wx.EXPAND | wx.RIGHT, 5)
@@ -518,7 +567,10 @@ class Gui(wx.Frame):
 
             # Create a dialog to display the file content.
             dialog = wx.Dialog(self, title="File Content")
-            textctrl = wx.TextCtrl(dialog, value=content, style=wx.TE_MULTILINE | wx.TE_READONLY)
+            textctrl = wx.TextCtrl(
+                dialog,
+                value=content,
+                style=wx.TE_MULTILINE | wx.TE_READONLY)
             sizer = wx.BoxSizer(wx.VERTICAL)
             sizer.Add(textctrl, proportion=1, flag=wx.EXPAND)
             dialog.SetSizer(sizer)
@@ -528,33 +580,41 @@ class Gui(wx.Frame):
         """Handle the event when the user changes the spin control value."""
         spin_value = self.spin.GetValue()
         self.canvas.render()
-    
+
     def on_reset_view_button(self, event):
         """Handle the event when the user clicks the reset view button."""
         self.canvas.reset_view()
         self.canvas.render()
-    
+
     def on_switch(self, event):
         self.Close()
         from gui import Gui as Gui2D
-        gui = Gui2D('2D GUI', self.path, self.names, self.devices, self.network, self.monitors, self.cycles_completed)
+        gui = Gui2D(
+            '2D GUI',
+            self.path,
+            self.names,
+            self.devices,
+            self.network,
+            self.monitors,
+            self.cycles_completed)
         gui.Show(True)
 
     def on_run_button(self, event):
-        """Handle the event when the user clicks the run button. Run the simulation from scratch."""
+        """Handle the event when the user clicks the run button.
+        Run the simulation from scratch."""
         # Reset the canvas view
         self.canvas.reset_view()
         self.cycles_completed = 0
         cycles = self.spin.GetValue()
         self.network.global_counter = 0
-        
+
         if cycles is not None:  # if the number of cycles provided is valid
             self.monitors.reset_monitors()
             print("".join(["Running for ", str(cycles), " cycles"]))
             self.devices.cold_startup()
             if self.run_simulation(cycles):
                 self.cycles_completed += cycles
-                
+
     def on_continue_button(self, event):
         """Continue a previously run simulation."""
         cycles = self.spin.GetValue()
@@ -565,7 +625,7 @@ class Gui(wx.Frame):
                 self.cycles_completed += cycles
                 print(" ".join(["Continuing for", str(cycles), "cycles.",
                                 "Total:", str(self.cycles_completed)]))
-    
+
     def run_simulation(self, cycles):
         """Run the simulation for a specific number of cycles."""
         for _ in range(cycles):
@@ -573,27 +633,27 @@ class Gui(wx.Frame):
                 self.monitors.record_signals()
             else:
                 print("Error! Network oscillating.")
-                return False 
+                return False
         self.canvas.render()
         print("Completed simulation.")
         return True
-        
+
     def on_text_box(self, event):
         """Handle the event when the user enters text."""
         text_box_value = self.text_box.GetValue()
         text = "".join(["New text box value: ", text_box_value])
         self.canvas.render()
-    
+
     def on_checkbox(self, event, checkbox):
         """Handle the event when the user checks or unchecks a checkbox.
         Monitor or zap the output signal accordingly."""
-        signal = checkbox.GetLabel()   
-        
+        signal = checkbox.GetLabel()
+
         if checkbox.IsChecked():
             # Add the signal to the monitored_signals list
             if signal not in self.monitored_signals:
                 self.monitored_signals.append(signal)
-            
+
             # Remove the signal from the not_monitored_signals list
             if signal in self.not_monitored_signals:
                 self.not_monitored_signals.remove(signal)
@@ -602,14 +662,14 @@ class Gui(wx.Frame):
             # Remove the signal from the monitored_signals list
             if signal in self.monitored_signals:
                 self.monitored_signals.remove(signal)
-            
+
             # Add the signal to the not_monitored_signals list
             if signal not in self.not_monitored_signals:
                 self.not_monitored_signals.append(signal)
             self.zap_command(signal)
 
         self.Layout()  # Refresh layout
-    
+
     def monitor_command(self, signal):
         """Set the specified monitor."""
         monitor = self.devices.get_signal_ids(signal)
@@ -631,14 +691,14 @@ class Gui(wx.Frame):
                 print("Successfully zapped monitor")
             else:
                 print("Error! Could not zap monitor.")
-    
+
     def on_slider_change(self, event, index):
-        """Handle the event when the user changes the slider value. Set the switch value accordingly."""
+        """Handle the event when the user changes the slider value.
+        Set the switch value accordingly."""
         slider = event.GetEventObject()
         value = slider.GetValue()
         self.devices.set_switch(index, value)
-    
+
     def on_close_window(self, event):
         """Handle the event when the user closes the window."""
         self.Destroy()
-    
