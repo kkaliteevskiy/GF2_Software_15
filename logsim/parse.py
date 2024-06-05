@@ -9,6 +9,10 @@ Classes
 Parser - parses the definition file and builds the logic network.
 """
 
+import builtins
+import wx
+
+builtins._ = wx.GetTranslation
 
 class Parser:
     """Parse the definition file and build the logic network.

@@ -1,0 +1,62 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-06-05 20:03+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gui.py:364
+msgid "&Open File"
+msgstr "&打开文件"
+
+#: gui.py:365
+msgid "&About"
+msgstr "&关于"
+
+#: gui.py:366
+msgid "&Exit"
+msgstr "&退出"
+
+#: gui.py:367
+msgid "&File"
+msgstr "&文件"
+
+#: gui.py:392
+msgid "Switch to 3D"
+msgstr "转换到三维"
+
+#: gui.py:398
+msgid "Cycles"
+msgstr "周期"
+
+#: gui.py:401
+msgid "Run"
+msgstr "运行"
+
+#: gui.py:402
+msgid "Continue"
+msgstr "继续"
+
+#: gui.py:403
+msgid "Reset View"
+msgstr "重置视图"
+
+#: gui.py:434
+msgid "Switches"
+msgstr "开关"
+
+#: gui.py:476
+msgid "Outputs (tick to monitor)"
+msgstr "输出（勾选以检测）"

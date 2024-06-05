@@ -1,12 +1,12 @@
 DEF G1 = AND 2 ;
-DEF SW1 = SWITCH 0 ;
-DEF SW2 = SWITCH 0 ;
+DEF SW1 = SWITCH 1 ;
+DEF R1 = RC 5 ;
 DEF SW3 = SWITCH 0 ;
 DEF SW4 = SWITCH 0 ;
 DEF Q1 = DTYPE ;
 DEF C1 = CLOCK 1 ;
 CON SW1 -> G1 . I1 ;
-CON SW2 -> G1 . I2 ;
+CON R1 -> G1 . I2 ;
 CON G1 -> Q1 . DATA ; # DATA works fine
 CON C1 -> Q1 . CLK ;
 CON SW3 -> Q1 . SET ;
