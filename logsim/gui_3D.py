@@ -394,10 +394,10 @@ class Gui(wx.Frame):
         # Configure the file menu
         fileMenu = wx.Menu()
         menuBar = wx.MenuBar()
-        fileMenu.Append(wx.ID_OPEN, "&Open File")
-        fileMenu.Append(wx.ID_ABOUT, "&About")
-        fileMenu.Append(wx.ID_EXIT, "&Exit")
-        menuBar.Append(fileMenu, "&File")
+        fileMenu.Append(wx.ID_OPEN, _("&Open File"))
+        fileMenu.Append(wx.ID_ABOUT, _("&About"))
+        fileMenu.Append(wx.ID_EXIT, _("&Exit"))
+        menuBar.Append(fileMenu, _("&File"))
         self.SetMenuBar(menuBar)
 
         # Canvas for drawing signals
@@ -422,15 +422,15 @@ class Gui(wx.Frame):
 
         # Configure the widgets
         self.switch_button = wx.Button(
-            self, label="Switch to 2D", size=(300, 25))
-        self.text = wx.StaticText(self, wx.ID_ANY, "Cycles")
+            self, label=_("Switch to 2D"), size=(300, 25))
+        self.text = wx.StaticText(self, wx.ID_ANY, _("Cycles"))
         self.text.SetFont(font)
         self.spin = wx.SpinCtrl(self, wx.ID_ANY, "10")
-        self.run_button = wx.Button(self, wx.ID_ANY, "Run")
+        self.run_button = wx.Button(self, wx.ID_ANY, _("Run"))
         # self.text_box = wx.TextCtrl(self, wx.ID_ANY, "",
         # style=wx.TE_PROCESS_ENTER)
-        self.continue_button = wx.Button(self, wx.ID_ANY, "Continue")
-        self.reset_view_button = wx.Button(self, wx.ID_ANY, "Reset View")
+        self.continue_button = wx.Button(self, wx.ID_ANY, _("Continue"))
+        self.reset_view_button = wx.Button(self, wx.ID_ANY, _("Reset View"))
 
         # Edit switch to 2D button
         # Set the color of the button to light blue
@@ -467,7 +467,7 @@ class Gui(wx.Frame):
         side_sizer.Add(self.reset_view_button, 0, wx.TOP, 5)
 
         # Create a label for switches
-        switches_label = wx.StaticText(scroll, label="Switches")
+        switches_label = wx.StaticText(scroll, label=_("Switches"))
         switches_label.SetFont(font)
         self.scroll_sizer.Add(switches_label, 0, wx.ALL, 10)
 
@@ -509,7 +509,7 @@ class Gui(wx.Frame):
         signals = self.monitors.get_signal_names()
         self.monitored_signals, self.not_monitored_signals = signals
         outputs_label = wx.StaticText(
-            scroll, label="Outputs (tick to monitor)")
+            scroll, label=_("Outputs (tick to monitor)"))
         outputs_label.SetFont(font)
         self.scroll_sizer.Add(outputs_label, 0, wx.ALL, 10)
 
