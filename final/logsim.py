@@ -81,7 +81,7 @@ def main(arg_list):
             locale = wx.Locale()
             locale.Init(wx.LANGUAGE_DEFAULT)
             locale.AddCatalogLookupPathPrefix('./locale')
-            locale.AddCatalog('cn')
+            locale.AddCatalog('logsim')
 
             gui = Gui("Logic Simulator", path, names, devices, network,
                       monitors, 0)

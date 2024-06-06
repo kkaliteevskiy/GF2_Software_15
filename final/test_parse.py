@@ -30,7 +30,7 @@ def monitor(new_names, devices, network):
 
 @pytest.fixture
 def scanner(new_names):
-    return Scanner("logic_definition.txt", new_names)
+    return Scanner("example_1.txt", new_names)
 
 
 @pytest.fixture

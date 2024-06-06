@@ -34,7 +34,7 @@ def scanner_edge(new_names):
 
 @pytest.fixture
 def scanner_file(new_names):
-    return Scanner("logic_definition.txt", new_names)
+    return Scanner("example_1.txt", new_names)
 
 
 def test_scanner_initial(scanner):

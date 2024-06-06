@@ -1,0 +1,4 @@
+DEF 3f = DTYPE;
+DEF A1 = CLOCK;
+DEF A3 = DTYPE;
+DEF A1 = XOR;
